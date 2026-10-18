@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>taina · арт студія</title>
+<meta name="description" content="Арт студія TAINA — малюй орнамент із живою симетрією ×8.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════════════
+   TAINA · АРТ СТУДІЯ — версія 1
+   Чорно-білий порожній холст, кисть і гумка з живою симетрією ×8.
+   Рисунок зберігається відносно центру (одна восьма частина), тому
+   при зміні розміру поля нічого не зсувається. Зменшив поле — краї
+   сховались, збільшив знову — повернулись.
+   Файл самостійний: без сканера, без палітр, без інших файлів.
+   ═══════════════════════════════════════════════════════════════════ */
+:root{--ink:#14110e;--panel:#1e1a16;--panel2:#28231d;--line:#40372d;
+  --txt:#f2ece2;--muted:#c2b6a4;--acc:#c9a876;--hot:#f0d9a8;--on-acc:#16130f;--bad:#e2604f}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--ink);color:var(--txt);font-family:Inter,Arial,sans-serif;
+  display:flex;flex-direction:column;height:100vh;overflow:hidden}
+button{font-family:inherit}
+button:focus-visible,input:focus-visible{outline:2px solid var(--hot);outline-offset:2px}
+
+header{flex:0 0 auto;display:flex;align-items:center;gap:16px;padding:12px 22px;border-bottom:1px solid var(--line)}
+header h1{font:700 18px 'JetBrains Mono',monospace;letter-spacing:.06em;color:var(--hot)}
+header .sub{color:var(--muted);font-size:13px}
+header a{margin-left:auto;color:var(--acc);font:600 13px 'JetBrains Mono',monospace;text-decoration:none}
+header a:hover{color:var(--hot)}
+
+.app{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:300px 1fr}
+aside{border-right:1px solid var(--line);padding:18px;display:flex;flex-direction:column;gap:20px;overflow-y:auto}
+main{min-width:0;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:16px}
+#stage{flex:1 1 auto;width:100%;min-height:0;display:flex;align-items:center;justify-content:center}
+#cv{display:block;touch-action:none;cursor:crosshair;box-shadow:0 14px 44px rgba(0,0,0,.55);border-radius:2px}
+.hint{flex:0 0 auto;color:var(--muted);font-size:12.5px;text-align:center;line-height:1.5}
+.hint b{color:var(--txt);font-family:'JetBrains Mono',monospace;font-weight:600}
+
+.sec{display:flex;flex-direction:column;gap:9px}
+.lbl{font:700 11px 'JetBrains Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--acc)}
+.seg{display:flex;border:1px solid var(--line);border-radius:11px;overflow:hidden}
+.seg button{flex:1;border:0;border-right:1px solid var(--line);background:var(--panel);color:var(--txt);
+  font:700 14px 'JetBrains Mono',monospace;padding:13px 6px;cursor:pointer}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--acc);color:var(--on-acc)}
+.seg button:hover:not(.on){background:var(--panel2)}
+
+.sl{display:flex;flex-direction:column;gap:4px}
+.sl .h{display:flex;justify-content:space-between;font-size:13.5px;color:var(--txt)}
+.sl .h b{color:var(--hot);font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
+.sl input{width:100%;height:30px;accent-color:var(--acc);cursor:pointer}
+
+.chk{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--txt);cursor:pointer}
+.chk input{width:20px;height:20px;accent-color:var(--acc);cursor:pointer}
+
+.row{display:flex;gap:8px}
+.b{flex:1;border:1px solid var(--line);background:var(--panel);color:var(--txt);border-radius:11px;
+  font:600 14px 'JetBrains Mono',monospace;padding:12px 8px;cursor:pointer}
+.b:hover:not(:disabled){border-color:var(--acc);color:var(--hot)}
+.b:disabled{opacity:.35;cursor:default}
+.b.pri{background:var(--acc);border-color:var(--acc);color:var(--on-acc);font-weight:700}
+.b.pri:hover{background:var(--hot);color:var(--on-acc)}
+.b.danger:hover{border-color:var(--bad);color:var(--bad)}
+.note{font-size:12px;color:var(--muted)}
+
+.stat{display:flex;flex-direction:column;font-family:'JetBrains Mono',monospace}
+.stat div{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);font-size:13px;color:var(--muted)}
+.stat div:first-child{border-top:1px solid var(--line)}
+.stat b{color:var(--hot);font-size:16px}
+
+@media(max-width:820px){
+  body{height:auto;min-height:100vh;overflow:auto}
+  .app{grid-template-columns:1fr}
+  aside{border-right:0;border-bottom:1px solid var(--line);order:2}
+  main{order:1;height:92vw}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>TAINA · Арт студія</h1>
+  <span class="sub">малюй орнамент — симетрія ×8 наживо</span>
+  <a href="https://taina-ten.vercel.app/index.html">← до TAINA</a>
+</header>
+
+<div class="app">
+  <aside>
+    <div class="sec">
+      <span class="lbl">Інструмент</span>
+      <div class="seg" id="tool">
+        <button type="button" data-t="brush" class="on">✎ Кисть</button>
+        <button type="button" data-t="eraser">⌫ Гумка</button>
+      </div>
+      <label class="sl"><span class="h"><span>Товщина кисті</span><b id="size-v"></b></span>
+        <input type="range" id="size" min="1" max="7" step="1"></label>
+    </div>
+
+    <div class="sec">
+      <span class="lbl">Полотно</span>
+      <label class="sl"><span class="h"><span>Розмір поля</span><b id="n-v"></b></span>
+        <input type="range" id="n" min="7" max="79" step="2"></label>
+      <label class="chk"><input type="checkbox" id="grid">Сітка</label>
+      <label class="chk"><input type="checkbox" id="axes">Осі симетрії</label>
+    </div>
+
+    <div class="sec">
+      <span class="lbl">Дії</span>
+      <div class="row">
+        <button type="button" class="b" id="undo" title="Ctrl+Z">← Назад</button>
+        <button type="button" class="b" id="redo" title="Ctrl+Y">Вперед →</button>
+      </div>
+      <button type="button" class="b danger" id="clear">Очистити холст</button>
+    </div>
+
+    <div class="sec">
+      <span class="lbl">Збереження</span>
+      <label class="sl"><span class="h"><span>Клітинка в картинці</span><b id="ex-v"></b></span>
+        <input type="range" id="ex" min="4" max="48" step="1"></label>
+      <label class="sl"><span class="h"><span>Біле поле навколо</span><b id="mg-v"></b></span>
+        <input type="range" id="mg" min="0" max="8" step="1"></label>
+      <button type="button" class="b pri" id="save">⤓ Зберегти картинку</button>
+      <span class="note" id="ex-size"></span>
+    </div>
+
+    <div class="stat">
+      <div><span>Поле</span><b id="st-n">—</b></div>
+      <div><span>Зафарбовано клітинок</span><b id="st-c">0</b></div>
+    </div>
+  </aside>
+
+  <main>
+    <div id="stage"><canvas id="cv"></canvas></div>
+    <div class="hint">Ліва кнопка миші — малювати, права — стирати.
+      Клавіші: <b>B</b> кисть, <b>E</b> гумка, <b>[</b> <b>]</b> товщина, <b>Ctrl+Z</b> назад, <b>Ctrl+Y</b> вперед.</div>
+  </main>
+</div>
+
+<script>
+(function(){
+'use strict';
+var $=function(id){return document.getElementById(id);};
+
+/* ═══ НАЛАШТУВАННЯ ═══
+   n — сторона поля в клітинках, завжди непарна: тоді є справжня
+   центральна клітинка, як в орнаменті TAINA. 79 — межа для 100 байт. */
+var MIN_N=7, MAX_N=79;
+var S={n:25,tool:'brush',size:1,grid:true,axes:true,ex:20,mg:2};
+/* РИСУНОК: лише одна восьма частина. Ключ клітинки — пара відстаней
+   від центру (більша, менша). Усі 8 віддзеркалень мають той самий
+   ключ, тож симетрія виходить сама собою і порушитись не може. */
+var mask=new Set();
+
+function clampN(v){v=Math.round(+v)||25;if(v%2===0)v++;return Math.max(MIN_N,Math.min(MAX_N,v));}
+try{
+  var sv=JSON.parse(localStorage.getItem('taina_studio')||'null');
+  if(sv){
+    if(sv.n)S.n=clampN(sv.n);
+    ['size','ex','mg'].forEach(function(k){if(sv[k]!=null)S[k]=+sv[k];});
+    if('grid' in sv)S.grid=!!sv.grid;
+    if('axes' in sv)S.axes=!!sv.axes;
+    if(Array.isArray(sv.mask))mask=new Set(sv.mask);
+  }
+}catch(e){}
+function save(){
+  try{localStorage.setItem('taina_studio',JSON.stringify(
+    {n:S.n,size:S.size,grid:S.grid,axes:S.axes,ex:S.ex,mg:S.mg,mask:Array.from(mask)}));}catch(e){}
+}
+
+function C(){return (S.n-1)/2;}
+function key(x,y){var c=C(),a=Math.abs(x-c),b=Math.abs(y-c);return a>=b?a+','+b:b+','+a;}
+function isOn(x,y){return mask.has(key(x,y));}
+function mirrorsOf(x,y){
+  var c=C(),i=x-c,j=y-c;
+  return [[i,j],[j,i],[-i,j],[-j,i],[i,-j],[j,-i],[-i,-j],[-j,-i]].map(function(p){return [c+p[0],c+p[1]];});
+}
+function brushCells(x,y){
+  var out=[],h=Math.floor((S.size-1)/2);
+  for(var dy=-h;dy<S.size-h;dy++)for(var dx=-h;dx<S.size-h;dx++){
+    var X=x+dx,Y=y+dy;if(X>=0&&Y>=0&&X<S.n&&Y<S.n)out.push([X,Y]);}
+  return out;
+}
+
+/* ═══ МАЛЮВАННЯ ХОЛСТА ═══ */
+var cv=$('cv'), g=cv.getContext('2d');
+var cs=10, dpr=1, hover=null, drawing=false, strokeErase=false, last=null, changed=false;
+function fit(){
+  var st=$('stage');
+  var av=Math.max(140,Math.min(st.clientWidth,st.clientHeight)-6);
+  cs=Math.max(3,Math.floor(av/S.n));
+  var css=cs*S.n;
+  dpr=Math.min(3,window.devicePixelRatio||1);
+  cv.style.width=cv.style.height=css+'px';
+  cv.width=cv.height=Math.round(css*dpr);
+  draw();
+}
+function draw(){
+  var n=S.n, W=cs*n;
+  g.setTransform(dpr,0,0,dpr,0,0);
+  g.fillStyle='#ffffff';g.fillRect(0,0,W,W);
+  /* підказка під мишею: куди ляже кисть (сіре) або що зітре гумка (червоне) */
+  var prev=null, er=(S.tool==='eraser');
+  if(hover&&!drawing){
+    prev=new Set();
+    brushCells(hover[0],hover[1]).forEach(function(p){
+      mirrorsOf(p[0],p[1]).forEach(function(q){prev.add(q[1]*n+q[0]);});});
+  }
+  for(var y=0;y<n;y++)for(var x=0;x<n;x++){
+    var on=isOn(x,y), pv=prev&&prev.has(y*n+x);
+    if(on){g.fillStyle=(pv&&er)?'#c0392b':'#111111';g.fillRect(x*cs,y*cs,cs,cs);}
+    else if(pv&&!er){g.fillStyle='rgba(0,0,0,.22)';g.fillRect(x*cs,y*cs,cs,cs);}
+  }
+  if(S.grid&&cs>=5){
+    g.strokeStyle='rgba(0,0,0,.13)';g.lineWidth=1/dpr;g.beginPath();
+    for(var i=1;i<n;i++){var v=i*cs;g.moveTo(v,0);g.lineTo(v,W);g.moveTo(0,v);g.lineTo(W,v);}
+    g.stroke();
+  }
+  if(S.axes){
+    var m=W/2;g.strokeStyle='rgba(214,60,40,.5)';g.lineWidth=1.2;g.setLineDash([5,4]);g.beginPath();
+    g.moveTo(m,0);g.lineTo(m,W);g.moveTo(0,m);g.lineTo(W,m);
+    g.moveTo(0,0);g.lineTo(W,W);g.moveTo(W,0);g.lineTo(0,W);
+    g.stroke();g.setLineDash([]);
+  }
+}
+
+/* ═══ КИСТЬ І ГУМКА ═══
+   Швидкий рух миші не лишає дірок: між двома точками промальовується
+   лінія клітинок. */
+function cellAt(e){
+  var r=cv.getBoundingClientRect();
+  var x=Math.floor((e.clientX-r.left)/r.width*S.n), y=Math.floor((e.clientY-r.top)/r.height*S.n);
+  return (x<0||y<0||x>=S.n||y>=S.n)?null:[x,y];
+}
+function stamp(x,y){
+  brushCells(x,y).forEach(function(p){
+    var k=key(p[0],p[1]);
+    if(strokeErase){if(mask.delete(k))changed=true;}
+    else if(!mask.has(k)){mask.add(k);changed=true;}
+  });
+}
+function line(a,b){
+  var x0=a[0],y0=a[1],x1=b[0],y1=b[1];
+  var dx=Math.abs(x1-x0),dy=-Math.abs(y1-y0),sx=x0<x1?1:-1,sy=y0<y1?1:-1,err=dx+dy;
+  for(;;){stamp(x0,y0);if(x0===x1&&y0===y1)break;var e2=2*err;
+    if(e2>=dy){err+=dy;x0+=sx;}if(e2<=dx){err+=dx;y0+=sy;}}
+}
+cv.addEventListener('pointerdown',function(e){
+  if(e.button!==0&&e.button!==2)return;
+  e.preventDefault();
+  var c=cellAt(e);if(!c)return;
+  drawing=true;strokeErase=(e.button===2)||S.tool==='eraser';changed=false;last=c;
+  try{cv.setPointerCapture(e.pointerId);}catch(_){}
+  stamp(c[0],c[1]);draw();stats();
+});
+cv.addEventListener('pointermove',function(e){
+  var c=cellAt(e);
+  if(drawing){if(c){if(last)line(last,c);last=c;draw();stats();}}
+  else{var h=c?c.join(','):'', o=hover?hover.join(','):'';if(h!==o){hover=c;draw();}}
+});
+function endStroke(){
+  if(!drawing)return;
+  drawing=false;last=null;
+  if(changed){pushHist();save();}
+  draw();
+}
+cv.addEventListener('pointerup',endStroke);
+cv.addEventListener('pointercancel',endStroke);
+cv.addEventListener('pointerleave',function(){if(!drawing&&hover){hover=null;draw();}});
+cv.addEventListener('contextmenu',function(e){e.preventDefault();});
+
+/* ═══ НАЗАД / ВПЕРЕД ═══ */
+var H=[],hp=-1;
+function snap(){return Array.from(mask).sort().join(';');}
+function pushHist(){var s=snap();if(H[hp]===s)return;H.splice(hp+1);H.push(s);if(H.length>200)H.shift();hp=H.length-1;syncHist();}
+function loadSnap(s){mask=new Set(s?s.split(';'):[]);}
+function after(){save();draw();stats();syncHist();}
+function undo(){if(hp>0){hp--;loadSnap(H[hp]);after();}}
+function redo(){if(hp<H.length-1){hp++;loadSnap(H[hp]);after();}}
+function syncHist(){$('undo').disabled=hp<=0;$('redo').disabled=hp>=H.length-1;}
+$('undo').onclick=undo;$('redo').onclick=redo;
+$('clear').onclick=function(){if(!mask.size)return;mask.clear();pushHist();after();};
+
+/* ═══ ЛІЧИЛЬНИКИ ═══ рахуємо лише видимі клітинки поточного поля */
+function stats(){
+  var n=S.n,cnt=0;
+  for(var y=0;y<n;y++)for(var x=0;x<n;x++)if(isOn(x,y))cnt++;
+  $('st-n').textContent=n+'×'+n;$('st-c').textContent=cnt;
+}
+
+/* ═══ ЗБЕРЕЖЕННЯ КАРТИНКИ ═══
+   Без сітки й осей: чисті чорні клітинки на білому, кожна — рівний
+   квадрат із цілої кількості пікселів. Сторона не більша за 4096. */
+function exportDims(){
+  var N=S.n+2*S.mg, k=S.ex;
+  while(k>1&&N*k>4096)k--;
+  return {N:N,k:k,px:N*k};
+}
+function syncExport(){var d=exportDims();$('ex-size').textContent='Картинка: '+d.px+'×'+d.px+' пікселів';}
+$('save').onclick=function(){
+  var d=exportDims(),c=document.createElement('canvas');
+  c.width=c.height=d.px;
+  var x=c.getContext('2d');x.fillStyle='#ffffff';x.fillRect(0,0,d.px,d.px);x.fillStyle='#111111';
+  for(var yy=0;yy<S.n;yy++)for(var xx=0;xx<S.n;xx++)
+    if(isOn(xx,yy))x.fillRect((xx+S.mg)*d.k,(yy+S.mg)*d.k,d.k,d.k);
+  c.toBlob(function(b){
+    var a=document.createElement('a');a.href=URL.createObjectURL(b);
+    a.download='taina-studio-'+S.n+'x'+S.n+'.png';a.style.display='none';
+    document.body.appendChild(a);a.click();
+    setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},1500);
+  },'image/png');
+};
+
+/* ═══ ПАНЕЛЬ ═══ */
+function syncTool(){Array.prototype.forEach.call($('tool').children,function(b){b.classList.toggle('on',b.dataset.t===S.tool);});draw();}
+$('tool').onclick=function(e){var b=e.target.closest('button');if(!b)return;S.tool=b.dataset.t;syncTool();};
+function syncSliders(){
+  $('size').value=S.size;$('size-v').textContent=S.size+(S.size===1?' клітинка':S.size<5?' клітинки':' клітинок');
+  $('n').value=S.n;$('n-v').textContent=S.n+'×'+S.n;
+  $('ex').value=S.ex;$('ex-v').textContent=S.ex+' пікс.';
+  $('mg').value=S.mg;$('mg-v').textContent=S.mg+(S.mg===1?' клітинка':(S.mg>=2&&S.mg<=4)?' клітинки':' клітинок');
+  $('grid').checked=S.grid;$('axes').checked=S.axes;
+  syncExport();
+}
+$('size').oninput=function(e){S.size=+e.target.value;syncSliders();save();};
+$('n').oninput=function(e){S.n=clampN(e.target.value);syncSliders();fit();stats();save();};
+$('ex').oninput=function(e){S.ex=+e.target.value;syncSliders();save();};
+$('mg').oninput=function(e){S.mg=+e.target.value;syncSliders();save();};
+$('grid').onchange=function(e){S.grid=e.target.checked;draw();save();};
+$('axes').onchange=function(e){S.axes=e.target.checked;draw();save();};
+
+/* клавіші — за місцем на клавіатурі, тож працюють і на українській розкладці */
+document.addEventListener('keydown',function(e){
+  if(e.target&&e.target.tagName==='INPUT'&&e.target.type!=='range'&&e.target.type!=='checkbox')return;
+  var ctrl=e.ctrlKey||e.metaKey;
+  if(ctrl&&e.code==='KeyZ'){e.preventDefault();if(e.shiftKey)redo();else undo();return;}
+  if(ctrl&&e.code==='KeyY'){e.preventDefault();redo();return;}
+  if(ctrl)return;
+  if(e.code==='KeyB'){S.tool='brush';syncTool();}
+  else if(e.code==='KeyE'){S.tool='eraser';syncTool();}
+  else if(e.code==='BracketLeft'){S.size=Math.max(1,S.size-1);syncSliders();save();draw();}
+  else if(e.code==='BracketRight'){S.size=Math.min(7,S.size+1);syncSliders();save();draw();}
+});
+addEventListener('resize',fit);
+
+syncSliders();syncTool();pushHist();fit();stats();
+})();
+</script>
+</body>
+</html>
