@@ -10,7 +10,10 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 /* ═══════════════════════════════════════════════════════════════════
-   TAINA · АРТ СТУДІЯ — версія 5
+   TAINA · АРТ СТУДІЯ — версія 6
+   Нове у v6: штамп — окремий об'єкт. Його можна вибрати, перетягнути
+   мишею або посунути стрілками, видалити клавішею Delete. Додано групу
+   «Символи» — 67 малих знаків.
    Нове у v5: «Немає» в заготовках; палітри без назв; печатка в центрі
    підбирається під кольори орнаменту (або вручну з 4 варіантів);
    «очі» на каналах; інверсія каналу по колу з 4 станів (поле / поле+рамка /
@@ -81,7 +84,7 @@ main{min-width:0;min-height:0;display:flex;flex-direction:column;align-items:cen
 .seg{display:flex;border:1px solid var(--line);border-radius:11px;overflow:hidden}
 .seg[hidden]{display:none}
 .seg button{flex:1;border:0;border-right:1px solid var(--line);background:var(--panel);color:var(--txt);
-  font:700 13px 'JetBrains Mono',monospace;padding:12px 3px;cursor:pointer}
+  font:700 12.5px 'JetBrains Mono',monospace;padding:12px 2px;cursor:pointer;white-space:nowrap}
 .seg button:last-child{border-right:0}
 .seg button.on{background:var(--acc);color:var(--on-acc)}
 .seg button:hover:not(.on){background:var(--panel2)}
@@ -121,6 +124,12 @@ main{min-width:0;min-height:0;display:flex;flex-direction:column;align-items:cen
 .tpl button.on{border-color:#ffb000;box-shadow:inset 0 0 0 1px #ffb000;color:var(--hot)}
 .tpl canvas{width:40px;height:40px;image-rendering:pixelated;border-radius:5px;display:block}
 
+.selbox{display:flex;flex-direction:column;gap:7px;padding:10px;border:1px solid #ffb000;border-radius:10px;font-size:12.5px;color:var(--txt);line-height:1.4}
+.selbox[hidden]{display:none}
+#stamps{display:flex;flex-direction:column;gap:6px}
+.tpl.sym{grid-template-columns:repeat(6,1fr);gap:5px}
+.tpl.sym button{padding:5px 0}
+.tpl.sym canvas{width:32px;height:32px}
 .sg{grid-column:1/-1;font:700 10.5px 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:4px}
 
 /* палітри — лише кольорові плашки */
@@ -179,6 +188,7 @@ main{min-width:0;min-height:0;display:flex;flex-direction:column;align-items:cen
         <button type="button" data-t="brush" class="on">✎ Кисть</button>
         <button type="button" data-t="eraser">⌫ Гумка</button>
         <button type="button" data-t="stamp">✦ Штамп</button>
+        <button type="button" data-t="select">✋ Рух</button>
       </div>
       <div class="seg" id="layer" hidden>
         <button type="button" data-l="bg">Фон</button>
@@ -194,8 +204,15 @@ main{min-width:0;min-height:0;display:flex;flex-direction:column;align-items:cen
       <span class="lbl">Штампи</span>
       <label class="sl" id="ss-row"><span class="h"><span>Масштаб штампа</span><b id="ss-v"></b></span>
         <input type="range" id="ss" min="1" max="3" step="1"></label>
-      <span class="note">Обери штамп і клікни на холсті — він ляже 8 разів. Той самий штамп на тому ж місці стирає сам себе, а там, де штампи перетинаються, кольори перевертаються.</span>
-      <div class="tpl" id="stamps"></div>
+      <span class="note">Обери штамп і клікни на холсті — він ляже 8 разів і залишиться вибраним. Потім будь-який штамп можна вибрати інструментом «Рух» і посунути. Той самий штамп на тому ж місці стирає сам себе; де штампи перетинаються, кольори перевертаються.</span>
+      <div class="selbox" id="selbox" hidden>
+        <span>Вибраний штамп: тягни мишею або стрілками на клавіатурі.</span>
+        <div class="row">
+          <button type="button" class="b" id="sel-del">Видалити</button>
+          <button type="button" class="b" id="sel-off">Зняти вибір</button>
+        </div>
+      </div>
+      <div id="stamps"></div>
     </div>
 
     <div class="sec">
@@ -355,8 +372,76 @@ var STAMPS=[
  {g:"Обрамлення",k:"wave",uk:"Хвиля",r:["X...X...X", ".X.X.X.X.", "..X...X.."]},
  {g:"Обрамлення",k:"step",uk:"Сходинки",r:["XX.....", ".XX....", "..XX...", "...XX..", "....XX.", ".....XX"]},
  {g:"Обрамлення",k:"dot",uk:"Крапки",r:["X.X", "...", "X.X"]},
- {g:"Обрамлення",k:"dot1",uk:"Крапка",r:["X"]}
+ {g:"Обрамлення",k:"dot1",uk:"Крапка",r:["X"]},
+ {g:"Символи",k:"s1",uk:"",r:["..X..", ".XXX.", "X...X"]},
+ {g:"Символи",k:"s2",uk:"",r:["XXX", ".XX", "..X"]},
+ {g:"Символи",k:"s3",uk:"",r:[".XX...XX.", "X..X.X..X", ".X..X..X.", "....X...."]},
+ {g:"Символи",k:"s4",uk:"",r:["XXX..", "X.X..", "..XXX", ".X..X", "X..XX"]},
+ {g:"Символи",k:"s5",uk:"",r:[".X...", "X..X.", "..X..", ".X..X", "...X."]},
+ {g:"Символи",k:"s6",uk:"",r:["..X..", "X.X.X", "X.X.X", "..X.."]},
+ {g:"Символи",k:"s7",uk:"",r:[".X.", "XXX", "XXX"]},
+ {g:"Символи",k:"s8",uk:"",r:[".X.X", "XXX.", ".XXX", "..X."]},
+ {g:"Символи",k:"s9",uk:"",r:[".X.", "XXX", "XXX", ".X."]},
+ {g:"Символи",k:"s10",uk:"",r:[".X.X", "XXX.", ".XXX", "X.X."]},
+ {g:"Символи",k:"s11",uk:"",r:["..X..", ".X.X.", "X.X.X", ".XXX."]},
+ {g:"Символи",k:"s12",uk:"",r:["...X.", "X.X.X", "X.XX.", ".X...", "..XX."]},
+ {g:"Символи",k:"s13",uk:"",r:["..X..", "X.X.X", "XXXXX"]},
+ {g:"Символи",k:"s14",uk:"",r:[".X.X", "X.X.", ".X.X", "..X."]},
+ {g:"Символи",k:"s15",uk:"",r:["X...", "X.X.", ".X..", "..XX"]},
+ {g:"Символи",k:"s16",uk:"",r:["X.X.X", "X.X.X", ".XXX."]},
+ {g:"Символи",k:"s17",uk:"",r:["X.X.X", ".XXX.", "X.X.X"]},
+ {g:"Символи",k:"s18",uk:"",r:[".X...", "XX.X.", "..X..", ".X.XX", "...X."]},
+ {g:"Символи",k:"s19",uk:"",r:["..X..", ".X.X.", "X.X.X", ".X.X.", "..X.."]},
+ {g:"Символи",k:"s20",uk:"",r:["X.X.X", ".X.X.", "X.X.X", ".X.X.", "X.X.X"]},
+ {g:"Символи",k:"s21",uk:"",r:["..X..", "X.X.X", "XXXXX", ".XXX.", "..X.."]},
+ {g:"Символи",k:"s22",uk:"",r:[".X...", "X....", "X.X..", ".X..X", "X.XX."]},
+ {g:"Символи",k:"s23",uk:"",r:["X", ".", "X", "X"]},
+ {g:"Символи",k:"s24",uk:"",r:["...X", "....", ".X..", "X..."]},
+ {g:"Символи",k:"s25",uk:"",r:["X.X", "...", ".X.", ".X."]},
+ {g:"Символи",k:"s26",uk:"",r:[".X..", "....", ".X.X", "X..."]},
+ {g:"Символи",k:"s27",uk:"",r:[".XXX.", "X.X.X", "XXXXX", ".XXX.", "..X.."]},
+ {g:"Символи",k:"s28",uk:"",r:[".X...", "X.XX.", "X.XX.", ".X..X", "X.XX."]},
+ {g:"Символи",k:"s29",uk:"",r:["X.X", ".X.", "XXX"]},
+ {g:"Символи",k:"s30",uk:"",r:["..X.", "X.XX", ".X..", "..X."]},
+ {g:"Символи",k:"s31",uk:"",r:["..X..", ".X.X.", "X...X"]},
+ {g:"Символи",k:"s32",uk:"",r:["XXX", "..X", "..X"]},
+ {g:"Символи",k:"s33",uk:"",r:["X...X", "XX.XX", "X.X.X"]},
+ {g:"Символи",k:"s34",uk:"",r:["..X..", ".XX..", "X.XXX", "...X.", "..X.."]},
+ {g:"Символи",k:"s35",uk:"",r:[".XX..", "XX...", "X.X.X", "...XX", "..XX."]},
+ {g:"Символи",k:"s36",uk:"",r:["X.X", "XXX", "X.X"]},
+ {g:"Символи",k:"s37",uk:"",r:["XXX", "X.X", "XXX"]},
+ {g:"Символи",k:"s38",uk:"",r:[".X.", "X.X", ".X."]},
+ {g:"Символи",k:"s39",uk:"",r:["XXX", "X.X", "X.X"]},
+ {g:"Символи",k:"s40",uk:"",r:[".X..", "X.X.", "...X", "..X."]},
+ {g:"Символи",k:"s41",uk:"",r:[".XX.", "X..X", "X.X.", "X..."]},
+ {g:"Символи",k:"s42",uk:"",r:["..X.", ".X.X", "X.XX"]},
+ {g:"Символи",k:"s43",uk:"",r:[".X", "X.", ".X"]},
+ {g:"Символи",k:"s44",uk:"",r:["XX..", "X...", ".X.X", "..XX"]},
+ {g:"Символи",k:"s45",uk:"",r:["XXX", ".X."]},
+ {g:"Символи",k:"s46",uk:"",r:["X..", ".X.", "X.X"]},
+ {g:"Символи",k:"s47",uk:"",r:["X...X", ".X.X.", "..X..", "..X.."]},
+ {g:"Символи",k:"s48",uk:"",r:[".X..", ".X..", ".XXX", "X..."]},
+ {g:"Символи",k:"s49",uk:"",r:["..X..", ".XXX.", "X.X.X", ".XXX.", "..X.."]},
+ {g:"Символи",k:"s50",uk:"",r:["XX.X", "X.X.", ".X.X", "..XX"]},
+ {g:"Символи",k:"s51",uk:"",r:["X.X", ".X.", "X.X"]},
+ {g:"Символи",k:"s52",uk:"",r:[".X.", "XXX", ".X."]},
+ {g:"Символи",k:"s53",uk:"",r:["X.X", "XXX", ".X."]},
+ {g:"Символи",k:"s54",uk:"",r:["XX..", "X...", ".X.X", "X.XX"]},
+ {g:"Символи",k:"s55",uk:"",r:["XX.XX", ".XXX.", "..X.."]},
+ {g:"Символи",k:"s56",uk:"",r:[".X...", "XX...", "X....", ".X.XX", "X.XX."]},
+ {g:"Символи",k:"s57",uk:"",r:["..XX..", "XXX...", ".X.X.X", "..X.XX", "...XX.", "....X."]},
+ {g:"Символи",k:"s58",uk:"",r:[".X...X.", ".X.X.X.", "XXXXXXX"]},
+ {g:"Символи",k:"s59",uk:"",r:[".XX..", "XX...", "X.X.X", ".X.XX", "X.XX."]},
+ {g:"Символи",k:"s60",uk:"",r:["X...X", "X.X.X", "XXXXX", "..X.."]},
+ {g:"Символи",k:"s61",uk:"",r:[".X.", "X.X", ".X.", "XXX"]},
+ {g:"Символи",k:"s62",uk:"",r:["..XXX", "..X.X", "X.XXX", ".X...", "..X.."]},
+ {g:"Символи",k:"s63",uk:"",r:["..X..", ".XXX.", "X.X.X"]},
+ {g:"Символи",k:"s64",uk:"",r:["XXX", ".XX", "X.X"]},
+ {g:"Символи",k:"s65",uk:"",r:["XXX", "X.X", ".X.", "X.X"]},
+ {g:"Символи",k:"s66",uk:"",r:[".X..", "XXXX", ".X.X", ".XXX"]},
+ {g:"Символи",k:"s67",uk:"",r:[".XX..", "..X..", "XXXXX", "X.X.X", "..XXX"]}
 ];
+var STAMP_BY={};STAMPS.forEach(function(st){STAMP_BY[st.k]=st;});
 
 /* ═══ СТАН ═══
    free — малюнок чистого холста.
@@ -371,7 +456,12 @@ var S={n:25,tool:'brush',layer:'both',size:1,grid:true,axes:true,ex:20,mg:2,word
 var INV_LBL=['◐','◐ поле','◐ усе','◐ рамка'];
 function invField(f){return S.inv[f]===1||S.inv[f]===2;}
 function invFrame(f){return S.inv[f]===2||S.inv[f]===3;}
-var M={free:new Set(),ch:{}};
+var M={free:new Set(),ch:{},objs:[]};
+/* ШТАМПИ-ОБ'ЄКТИ: кожен поставлений штамп пам'ятає, що це за штамп, де він
+   (зсув від центру x,y), масштаб, у яких каналах (chs) і шарах (L) лежить
+   і чи поставлений в орнамент (w) чи на чистий холст. Малюнок кисті
+   лежить окремо; штампи накладаються зверху і перевертають клітинки. */
+var objSeq=1, sel=null, selT=0;
 function clampN(v){v=Math.round(+v)||25;if(v%2===0)v++;return Math.max(MIN_N,Math.min(MAX_N,v));}
 function chSet(f,L){var k=f+L;return M.ch[k]||(M.ch[k]=new Set());}
 function chHas(f,L,key){var s=M.ch[f+L];return !!(s&&s.has(key));}
@@ -427,9 +517,11 @@ function mix(a,b,t){return [Math.round(a[0]+(b[0]-a[0])*t),Math.round(a[1]+(b[1]
   if(typeof src.word==='string')S.word=src.word;
   if(src.pal!=null&&FLAT[+src.pal])S.pal=+src.pal;
   if(src.layer==='bg'||src.layer==='ink'||src.layer==='both')S.layer=src.layer;
-  if(src.tool==='brush'||src.tool==='eraser'||src.tool==='stamp'||src.tool===null)S.tool=src.tool;
+  if(src.tool==='brush'||src.tool==='eraser'||src.tool==='stamp'||src.tool==='select'||src.tool===null)S.tool=src.tool;
   if(STAMPS.some(function(s){return s.k===src.stamp;}))S.stamp=src.stamp;
   if(Array.isArray(src.free))M.free=new Set(src.free);
+  if(Array.isArray(src.objs))M.objs=src.objs.filter(function(o){return o&&STAMP_BY[o.k];});
+  M.objs.forEach(function(o){objSeq=Math.max(objSeq,(+o.id||0)+1);});
   if(sv){
     if(Array.isArray(sv.chs))S.chs=[0,1,2].map(function(i){return sv.chs[i]!==false;});
     /* у v4 інверсія була так/ні — «так» стає станом «поле» */
@@ -451,7 +543,7 @@ function mix(a,b,t){return [Math.round(a[0]+(b[0]-a[0])*t),Math.round(a[1]+(b[1]
 function save(){
   try{localStorage.setItem('taina_studio3',JSON.stringify({n:S.n,size:S.size,grid:S.grid,axes:S.axes,ex:S.ex,mg:S.mg,
     k:S.k,neg:S.neg,word:S.word,pal:S.pal,layer:S.layer,tool:S.tool,stamp:S.stamp,ss:S.ss,chs:S.chs,inv:S.inv,vis:S.vis,seal:S.seal,
-    free:Array.from(M.free),ch:chPlain()}));}catch(e){}
+    free:Array.from(M.free),ch:chPlain(),objs:M.objs}));}catch(e){}
 }
 
 /* ═══ СЛОВО → ОРНАМЕНТ ═══ 1 клітинка = 1 біт UTF-8, октант ×8.
@@ -480,7 +572,43 @@ function keyN(x,y,n){var c=(n-1)/2,a=Math.abs(x-c),b=Math.abs(y-c);return a>=b?a
 /* ПЕЧАТКА: щойно вільні канали перестали бути простою копією коду
    (малюнок або інверсія), центр 5×5 у вільних каналах робимо рівним —
    тоді сканер не прочитає там випадкового сміття. */
-function sealOn(){return !!wordInfo()&&(chAny()||invAny());}
+/* МАТРИЦІ ПЕРЕТВОРЕНЬ симетрії ×8: (i,j) → (a·i+b·j, c·i+d·j), у тому ж порядку,
+   що й mirrorsOf. Обернене перетворення — транспонована матриця. */
+var T8=[[1,0,0,1],[0,1,1,0],[-1,0,0,1],[0,-1,1,0],[1,0,0,-1],[0,1,-1,0],[-1,0,0,-1],[0,-1,-1,0]];
+function tf(t,i,j){var m=T8[t];return [m[0]*i+m[1]*j,m[2]*i+m[3]*j];}
+function tfInv(t,i,j){var m=T8[t];return [m[0]*i+m[2]*j,m[1]*i+m[3]*j];}
+function stampCellsOf(st,s,x,y,n){
+  var R=st.r, h=R.length, w=R[0].length, cy=Math.floor(h/2), cx=Math.floor(w/2), o=Math.floor((s-1)/2), out=[];
+  for(var py=0;py<h;py++)for(var px=0;px<w;px++){
+    if(R[py][px]!=='X')continue;
+    for(var sy=0;sy<s;sy++)for(var sx=0;sx<s;sx++){
+      var X=x+(px-cx)*s+sx-o, Y=y+(py-cy)*s+sy-o;
+      if(X>=0&&Y>=0&&X<n&&Y<n)out.push([X,Y]);
+    }
+  }
+  return out;
+}
+function objCells(o,n){var c=(n-1)/2;return stampCellsOf(STAMP_BY[o.k],o.ss,c+o.x,c+o.y,n);}
+function objsHere(){var w=!!wordInfo();return M.objs.filter(function(o){return !!o.w===w;});}
+/* ДІЙСНИЙ МАЛЮНОК = малюнок кисті, поверх якого кожен штамп перевертає свої клітинки */
+function eff(){
+  var E={free:new Set(M.free),ch:{}},k;
+  for(k in M.ch)E.ch[k]=new Set(M.ch[k]);
+  var n=N(), car=P().c;
+  objsHere().forEach(function(o){
+    var seen={};
+    objCells(o,n).forEach(function(p){
+      var kk=keyN(p[0],p[1],n);if(seen[kk])return;seen[kk]=1;
+      var tg=[];
+      if(!o.w)tg.push(E.free);
+      else o.chs.forEach(function(f){if(f===car)return;o.L.forEach(function(L){tg.push(E.ch[f+L]||(E.ch[f+L]=new Set()));});});
+      tg.forEach(function(st){if(st.has(kk))st.delete(kk);else st.add(kk);});
+    });
+  });
+  return E;
+}
+function effAny(E){for(var k in E.ch)if(E.ch[k].size)return true;return false;}
+function sealOn(E){return !!wordInfo()&&(effAny(E)||invAny());}
 function inSeal(x,y,n){var c=(n-1)/2;return Math.abs(x-c)<=2&&Math.abs(y-c)<=2;}
 
 /* ═══ КАРТА КОЛЬОРІВ ═══ одна для екрана, каналів, перевірки й збереження.
@@ -488,14 +616,14 @@ function inSeal(x,y,n){var c=(n-1)/2;return Math.abs(x-c)<=2&&Math.abs(y-c)<=2;}
    Малюнок, печатка й інверсія — тільки в полі даних і тільки у вільних каналах;
    рамка й тиха зона не змінюються, по них сканер знаходить код. */
 function matrix(){
-  var W=wordInfo(), C=colors(), n, T, cells, x, y, cnt=0;
+  var W=wordInfo(), C=colors(), n, T, cells, x, y, cnt=0, E=eff();
   if(!W){
     n=S.n; cells=new Array(n*n);
-    for(y=0;y<n;y++)for(x=0;x<n;x++){var hit=M.free.has(keyN(x,y,n));if(hit)cnt++;cells[y*n+x]=hit?C.c1:C.c0;}
+    for(y=0;y<n;y++)for(x=0;x<n;x++){var hit=E.free.has(keyN(x,y,n));if(hit)cnt++;cells[y*n+x]=hit?C.c1:C.c0;}
     return {T:n,off:0,n:n,cells:cells,word:false,C:C,cnt:cnt};
   }
   n=W.n; var CW=n+6; T=CW+4; cells=new Array(T*T);
-  var so=sealOn(), fr=freeCh(), sealIdx=[];
+  var so=sealOn(E), fr=freeCh(), sealIdx=[];
   for(var i=0;i<T*T;i++)cells[i]=invCol(C.qz,true);
   for(y=0;y<CW;y++)for(x=0;x<CW;x++){
     var r=Math.min(x,y,CW-1-x,CW-1-y), col;
@@ -505,7 +633,7 @@ function matrix(){
     else{
       var dx=x-3, dy=y-3, on=W.g[dy*n+dx], kk=keyN(dx,dy,n), base=on?C.c1:C.c0, L=on?'o':'z', drawn=false;
       col=base.slice();
-      fr.forEach(function(f){if(chHas(f,L,kk)){col[f]=other(f,base[f]);drawn=true;}});
+      fr.forEach(function(f){var es=E.ch[f+L];if(es&&es.has(kk)){col[f]=other(f,base[f]);drawn=true;}});
       if(drawn)cnt++;
       col=invCol(col,false);
       if(so&&inSeal(dx,dy,n))sealIdx.push([(y+2)*T+(x+2),base]);
@@ -594,28 +722,17 @@ function brushCells(x,y,n){
   return out;
 }
 function curStamp(){for(var i=0;i<STAMPS.length;i++)if(STAMPS[i].k===S.stamp)return STAMPS[i];return STAMPS[0];}
-function stampCells(x,y,n){
-  var st=curStamp(), R=st.r, h=R.length, w=R[0].length, cy=Math.floor(h/2), cx=Math.floor(w/2),
-      s=S.ss, o=Math.floor((s-1)/2), out=[];
-  for(var py=0;py<h;py++)for(var px=0;px<w;px++){
-    if(R[py][px]!=='X')continue;
-    for(var sy=0;sy<s;sy++)for(var sx=0;sx<s;sx++){
-      var X=x+(px-cx)*s+sx-o, Y=y+(py-cy)*s+sy-o;
-      if(X>=0&&Y>=0&&X<n&&Y<n)out.push([X,Y]);
-    }
-  }
-  return out;
-}
+function stampCells(x,y,n){return stampCellsOf(curStamp(),S.ss,x,y,n);}
 function toolCells(x,y,n){return S.tool==='stamp'?stampCells(x,y,n):brushCells(x,y,n);}
 
 /* ПРИВИД: тимчасово «малюємо» під курсором, беремо картинку і повертаємо
    все як було. На холсті — суміш 50/50 між тим, що є, і тим, що ляже. */
-function cloneM(){var c={free:new Set(M.free),ch:{}};for(var k in M.ch)c.ch[k]=new Set(M.ch[k]);return c;}
+function cloneM(){var c={free:new Set(M.free),ch:{},objs:M.objs.map(function(o){return JSON.parse(JSON.stringify(o));})};for(var k in M.ch)c.ch[k]=new Set(M.ch[k]);return c;}
 function ghostMatrix(){
-  if(!hover||drawing||blocked()||!S.tool)return null;
+  if(!hover||drawing||blocked()||!S.tool||S.tool==='select')return null;
   var bk=cloneM(), ch0=changed, md0=mode;
-  mode=S.tool==='eraser'?'erase':S.tool==='stamp'?'xor':'paint';
-  applyCells(toolCells(hover[0],hover[1],N()));
+  if(S.tool==='stamp')placeStamp(hover[0],hover[1],true);
+  else{mode=S.tool==='eraser'?'erase':'paint';applyCells(toolCells(hover[0],hover[1],N()));}
   var Mx=matrix();
   M=bk;changed=ch0;mode=md0;
   return Mx;
@@ -651,12 +768,25 @@ function draw(Mx){
     g.stroke();g.setLineDash([]);
   }
   /* тонка рамочка лише навколо самого курсора — щоб було видно, де ти */
-  if(hover&&!drawing&&S.tool){
+  if(hover&&!drawing&&S.tool&&S.tool!=='select'){
     var tc=toolCells(hover[0],hover[1],n);
     if(tc.length){var mnx=1e9,mny=1e9,mxx=-1,mxy=-1;
       tc.forEach(function(p){mnx=Math.min(mnx,p[0]);mny=Math.min(mny,p[1]);mxx=Math.max(mxx,p[0]);mxy=Math.max(mxy,p[1]);});
       g.strokeStyle=dark?'rgba(255,255,255,.55)':'rgba(0,0,0,.5)';g.lineWidth=1;
       g.strokeRect((mnx+off)*cs+.5,(mny+off)*cs+.5,(mxx-mnx+1)*cs-1,(mxy-mny+1)*cs-1);}
+  }
+  /* вибраний штамп: пунктирні рамки навколо всіх 8 копій, суцільна — навколо тієї, яку тягнеш */
+  var so=selObj();
+  if(so){
+    var cc=(n-1)/2, base=objCells(so,n);
+    if(base.length)for(var t=0;t<8;t++){
+      var a1=1e9,b1=1e9,a2=-1e9,b2=-1e9;
+      base.forEach(function(p){var q=tf(t,p[0]-cc,p[1]-cc);a1=Math.min(a1,q[0]);b1=Math.min(b1,q[1]);a2=Math.max(a2,q[0]);b2=Math.max(b2,q[1]);});
+      var rx=(a1+cc+off)*cs, ry=(b1+cc+off)*cs, rw=(a2-a1+1)*cs, rh=(b2-b1+1)*cs;
+      g.lineWidth=t===selT?2.5:1.5;g.setLineDash(t===selT?[]:[4,3]);
+      g.strokeStyle='#ffb000';g.strokeRect(rx-1.5,ry-1.5,rw+3,rh+3);
+    }
+    g.setLineDash([]);
   }
   drawChans(Mx);
   syncSeals(Mx);
@@ -766,21 +896,70 @@ function line(a,b){
   for(;;){applyCells(brushCells(x0,y0,n));if(x0===x1&&y0===y1)break;var e2=2*err;
     if(e2>=dy){err+=dy;x0+=sx;}if(e2<=dx){err+=dx;y0+=sy;}}
 }
+/* ═══ ШТАМПИ-ОБ'ЄКТИ ═══ */
+function selObj(){if(sel==null)return null;for(var i=0;i<M.objs.length;i++)if(M.objs[i].id===sel)return M.objs[i];return null;}
+function sameObj(a,b){return a.k===b.k&&a.x===b.x&&a.y===b.y&&a.ss===b.ss&&!!a.w===!!b.w&&
+  a.chs.join()===b.chs.join()&&a.L.join()===b.L.join();}
+/* поставити штамп у клітинку (cx,cy). Такий самий штамп на тому ж місці —
+   прибирається (стирає сам себе). preview — лише для блідої підказки. */
+function placeStamp(cx,cy,preview){
+  var n=N(),c=(n-1)/2,W=!!wordInfo();
+  var o={id:objSeq,k:S.stamp,x:cx-c,y:cy-c,ss:S.ss,w:W,chs:W?selCh():[],L:W?layersL():[]};
+  for(var i=0;i<M.objs.length;i++)if(sameObj(M.objs[i],o)){M.objs.splice(i,1);return null;}
+  if(!preview)objSeq++;
+  M.objs.push(o);return o;
+}
+/* який штамп під клітинкою: перевіряємо всі 8 копій кожного штампа,
+   зверху вниз; t — номер копії, яку зачепили */
+function hitObj(x,y){
+  var n=N(),c=(n-1)/2,list=objsHere();
+  for(var i=list.length-1;i>=0;i--){
+    var cells=objCells(list[i],n);
+    for(var t=0;t<8;t++){
+      for(var j=0;j<cells.length;j++){var q=tf(t,cells[j][0]-c,cells[j][1]-c);if(q[0]===x-c&&q[1]===y-c)return {o:list[i],t:t};}
+    }
+  }
+  return null;
+}
+/* посунути вибраний штамп: (dx,dy) — зсув на екрані для копії selT */
+function moveSel(dx,dy,o0){
+  var o=selObj();if(!o)return false;
+  var d=tfInv(selT,dx,dy), n=N(), R=(n-1)/2, bx=o0?o0.x:o.x, by=o0?o0.y:o.y;
+  var nx=Math.max(-R,Math.min(R,bx+d[0])), ny=Math.max(-R,Math.min(R,by+d[1]));
+  if(nx===o.x&&ny===o.y)return false;
+  o.x=nx;o.y=ny;return true;
+}
+function deleteSel(){
+  var o=selObj();if(!o)return;
+  M.objs=M.objs.filter(function(q){return q.id!==o.id;});sel=null;pushHist();after();
+}
+var drag=null;
 cv.addEventListener('pointerdown',function(e){
   if(e.button!==0&&e.button!==2)return;
   e.preventDefault();
+  var c=cellAt(e);
+  /* вибір і перетягування штампів */
+  if(S.tool==='select'||(!S.tool&&c&&hitObj(c[0],c[1]))){
+    if(!c)return;
+    var h=hitObj(c[0],c[1]);
+    if(e.button===2){if(h){sel=h.o.id;deleteSel();}return;}
+    if(!S.tool){S.tool='select';syncSliders();syncLayer();}
+    if(!h){sel=null;syncSel();draw();return;}
+    sel=h.o.id;selT=h.t;drag={c:c,x:h.o.x,y:h.o.y,moved:false};
+    try{cv.setPointerCapture(e.pointerId);}catch(_){}
+    syncSel();draw();return;
+  }
   if(blocked()){flashNote();return;}
   if(!S.tool){flashHint();return;}
-  var c=cellAt(e);if(!c)return;
+  if(!c)return;
   changed=false;tplLive=false;syncTpl();
   if(S.tool==='stamp'){
-    mode=(e.button===2)?'erase':'xor';
-    applyCells(stampCells(c[0],c[1],N()));
-    mode='paint';
-    /* штамп лягає і відпускається — наступний треба обрати знову */
-    S.tool=null;hover=null;
-    if(changed)pushHist();
-    save();syncSliders();syncLayer();draw();return;
+    if(e.button===2){var hh=hitObj(c[0],c[1]);if(hh){sel=hh.o.id;deleteSel();}return;}
+    var o=placeStamp(c[0],c[1],false);
+    /* штамп лягає і відпускається; щойно поставлений одразу вибраний —
+       його можна посунути стрілками або перетягнути */
+    S.tool='select';hover=null;sel=o?o.id:null;selT=0;
+    pushHist();after();return;
   }
   mode=((e.button===2)||S.tool==='eraser')?'erase':'paint';
   drawing=true;last=c;
@@ -790,10 +969,16 @@ cv.addEventListener('pointerdown',function(e){
 function flashHint(){var h=$('hint');h.classList.remove('flash');void h.offsetWidth;h.classList.add('flash');}
 cv.addEventListener('pointermove',function(e){
   var c=cellAt(e);
-  if(drawing){hover=c;if(c){if(last)line(last,c);last=c;draw();}}
-  else{var h=c?c.join(','):'', o=hover?hover.join(','):'';if(h!==o){hover=c;draw();}}
+  if(drag){
+    if(c&&moveSel(c[0]-drag.c[0],c[1]-drag.c[1],{x:drag.x,y:drag.y})){drag.moved=true;draw();}
+    return;
+  }
+  if(drawing){hover=c;if(c){if(last)line(last,c);last=c;draw();}return;}
+  if(S.tool==='select'||!S.tool)cv.style.cursor=(c&&hitObj(c[0],c[1]))?'grab':(S.tool?'default':'default');
+  var h=c?c.join(','):'', o2=hover?hover.join(','):'';if(h!==o2){hover=c;draw();}
 });
 function endStroke(){
+  if(drag){var mv=drag.moved;drag=null;if(mv){pushHist();save();}draw();return;}
   if(!drawing)return;
   drawing=false;last=null;mode='paint';
   if(changed){pushHist();save();}
@@ -845,31 +1030,40 @@ function buildTpl(){
 }
 function syncTpl(){Array.prototype.forEach.call($('tpl').children,function(b){b.classList.toggle('on',!!(tplLive&&lastTpl&&b.dataset.k===lastTpl.k));});}
 function buildStamps(){
-  var box=$('stamps');box.innerHTML='';var grp=null;
+  var box=$('stamps');box.innerHTML='';var grp=null,grid=null;
   STAMPS.forEach(function(st){
-    if(st.g!==grp){grp=st.g;var hd=document.createElement('div');hd.className='sg';hd.textContent=grp;box.appendChild(hd);}
+    if(st.g!==grp){
+      grp=st.g;var hd=document.createElement('div');hd.className='sg';hd.textContent=grp;box.appendChild(hd);
+      grid=document.createElement('div');grid.className='tpl'+(grp==='Символи'?' sym':'');box.appendChild(grid);
+    }
     var b=document.createElement('button');b.type='button';b.dataset.k=st.k;
-    var h=st.r.length,w=st.r[0].length,Nn=11,oy=Math.floor((Nn-h)/2),ox=Math.floor((Nn-w)/2);
+    var h=st.r.length,w=st.r[0].length,Nn=grp==='Символи'?7:11,oy=Math.floor((Nn-h)/2),ox=Math.floor((Nn-w)/2);
     b.appendChild(iconCanvas(Nn,function(X,y){var r=st.r[y-oy];return !!(r&&r[X-ox]==='X');}));
-    var sp=document.createElement('span');sp.textContent=st.uk;b.appendChild(sp);
-    b.onclick=function(){S.stamp=st.k;S.tool='stamp';save();syncSliders();syncLayer();draw();};
-    box.appendChild(b);
+    if(st.uk){var sp=document.createElement('span');sp.textContent=st.uk;b.appendChild(sp);}
+    else b.title='Символ';
+    b.onclick=function(){S.stamp=st.k;S.tool='stamp';sel=null;save();syncSliders();syncLayer();syncSel();draw();};
+    grid.appendChild(b);
   });
   syncStamps();
 }
 function syncStamps(){Array.prototype.forEach.call($('stamps').querySelectorAll('button'),function(b){b.classList.toggle('on',S.tool==='stamp'&&b.dataset.k===S.stamp);});}
+function syncSel(){$('selbox').hidden=!selObj();}
+$('sel-del').onclick=deleteSel;
+$('sel-off').onclick=function(){sel=null;syncSel();draw();};
 /* малюнок чистого холста — у відмічені канали орнаменту */
 $('take').onclick=function(){
   if(blocked()){flashNote();return;}
-  var tg=tplTargets();tg.forEach(function(s){s.clear();M.free.forEach(function(k){s.add(k);});});
+  var fe=(function(){var save=S.word;S.word='';WC.key=null;var E=eff();S.word=save;WC.key=null;return E.free;})();
+  var tg=tplTargets();tg.forEach(function(s){s.clear();fe.forEach(function(k){s.add(k);});});
   tplLive=false;pushHist();after();
 };
 
 /* ═══ НАЗАД / ВПЕРЕД ═══ */
 var H=[],hp=-1;
-function snap(){return JSON.stringify([Array.from(M.free).sort(),chPlain()]);}
+function snap(){return JSON.stringify([Array.from(M.free).sort(),chPlain(),M.objs]);}
 function pushHist(){var s=snap();if(H[hp]===s)return;H.splice(hp+1);H.push(s);if(H.length>200)H.shift();hp=H.length-1;syncHist();}
-function loadSnap(s){var a=JSON.parse(s);M.free=new Set(a[0]);M.ch={};var o=a[1]||{};for(var k in o)M.ch[k]=new Set(o[k]);}
+function loadSnap(s){var a=JSON.parse(s);M.free=new Set(a[0]);M.ch={};var o=a[1]||{};for(var k in o)M.ch[k]=new Set(o[k]);
+  M.objs=a[2]||[];if(!selObj())sel=null;}
 function undo(){if(hp>0){hp--;loadSnap(H[hp]);tplLive=false;after();}}
 function redo(){if(hp<H.length-1){hp++;loadSnap(H[hp]);tplLive=false;after();}}
 function syncHist(){$('undo').disabled=hp<=0;$('redo').disabled=hp>=H.length-1;}
@@ -877,6 +1071,7 @@ $('undo').onclick=undo;$('redo').onclick=redo;
 $('clear').onclick=function(){
   var before=snap();
   if(wordInfo())M.ch={};else M.free.clear();
+  var w=!!wordInfo();M.objs=M.objs.filter(function(o){return !!o.w!==w;});sel=null;
   tplLive=false;
   if(snap()!==before){pushHist();after();}
 };
@@ -923,7 +1118,7 @@ function buildIcons(){buildPal();buildTpl();buildStamps();}
 function syncLayer(){
   var W=wordInfo(), fs=selCh();
   $('layer').hidden=!W;
-  $('take').hidden=!W||!M.free.size;
+  $('take').hidden=!W||(!M.free.size&&!M.objs.some(function(o){return !o.w;}));
   Array.prototype.forEach.call($('layer').children,function(b){b.classList.toggle('on',b.dataset.l===S.layer);});
   var note='',warn=false;
   if(W&&!fs.length){note='Відміть галочкою хоча б один вільний канал під холстом — у ньому й малюватимеш.';warn=true;}
@@ -934,10 +1129,10 @@ function syncLayer(){
     ?'Заготовка лягає у відмічені канали й поточний шар і замінює там малюнок. «Назад» поверне як було.'
     :'Заготовка замінює малюнок, далі підправляй кистю. «Назад» поверне як було.';
   cv.classList.toggle('blocked',blocked());
-  cv.style.cursor=S.tool?'':'default';
-  $('hint').innerHTML=(!S.tool?'Обери кисть, гумку або штамп. ':'Ліва кнопка миші — малювати, права — стирати. ')
+  cv.style.cursor=(S.tool&&S.tool!=='select')?'':'default';
+  $('hint').innerHTML=(!S.tool?'Обери кисть, гумку або штамп. ':S.tool==='select'?'Клікни штамп і тягни; стрілки — посунути, <b>Delete</b> — видалити, <b>Esc</b> — зняти вибір. ':'Ліва кнопка миші — малювати, права — стирати. ')
     +'Клавіші: '+(W?'<b>1</b> фон, <b>2</b> узор, <b>3</b> разом, ':'')
-    +'<b>B</b> кисть, <b>E</b> гумка, <b>S</b> штамп, <b>[</b> <b>]</b> розмір, <b>Ctrl+Z</b> назад.';
+    +'<b>B</b> кисть, <b>E</b> гумка, <b>S</b> штамп, <b>V</b> рух, <b>[</b> <b>]</b> розмір, <b>Ctrl+Z</b> назад.';
 }
 function plural(v,one,few,many){var m10=v%10,m100=v%100;return v+' '+(m10===1&&m100!==11?one:(m10>=2&&m10<=4&&(m100<12||m100>14))?few:many);}
 function syncSliders(){
@@ -958,7 +1153,7 @@ function syncSliders(){
   syncStamps();
   syncExport();
 }
-function after(){save();syncSliders();syncLayer();fit();syncHist();syncTpl();}
+function after(){save();syncSliders();syncLayer();fit();syncHist();syncTpl();syncSel();}
 
 /* слово: межа 100 байт, як на сайті; зайве обрізається по символах */
 $('word').value=S.word;
@@ -968,7 +1163,7 @@ $('word').addEventListener('input',function(e){
   if(out!==v)e.target.value=out;
   S.word=out;WC.key=null;hover=null;after();
 });
-$('tool').onclick=function(e){var b=e.target.closest('button');if(!b)return;S.tool=b.dataset.t;save();syncSliders();syncLayer();draw();};
+$('tool').onclick=function(e){var b=e.target.closest('button');if(!b)return;S.tool=b.dataset.t;if(S.tool!=='select')sel=null;save();syncSliders();syncLayer();syncSel();draw();};
 $('layer').onclick=function(e){var b=e.target.closest('button');if(!b)return;S.layer=b.dataset.l;save();syncLayer();draw();};
 $('neg').onclick=function(e){var b=e.target.closest('button');if(!b)return;S.neg=b.dataset.v==='1';after();buildIcons();};
 $('size').oninput=function(e){S.size=+e.target.value;syncSliders();save();};
@@ -992,6 +1187,16 @@ document.addEventListener('keydown',function(e){
   if(ctrl&&e.code==='KeyZ'){e.preventDefault();if(e.shiftKey)redo();else undo();return;}
   if(ctrl&&e.code==='KeyY'){e.preventDefault();redo();return;}
   if(ctrl)return;
+  var so=selObj();
+  if(so&&/^Arrow/.test(e.code)){
+    e.preventDefault();
+    var st=e.shiftKey?3:1, d=e.code==='ArrowLeft'?[-st,0]:e.code==='ArrowRight'?[st,0]:e.code==='ArrowUp'?[0,-st]:[0,st];
+    if(moveSel(d[0],d[1])){pushHist();save();draw();}
+    return;
+  }
+  if(so&&(e.code==='Delete'||e.code==='Backspace')){e.preventDefault();deleteSel();return;}
+  if(e.code==='Escape'){if(sel!=null){sel=null;syncSel();draw();}return;}
+  if(e.code==='KeyV'){S.tool='select';syncSliders();syncLayer();draw();return;}
   if(e.code==='KeyB'){S.tool='brush';syncSliders();syncLayer();draw();}
   else if(e.code==='KeyE'){S.tool='eraser';syncSliders();syncLayer();draw();}
   else if(e.code==='KeyS'){S.tool='stamp';syncSliders();syncLayer();draw();}
