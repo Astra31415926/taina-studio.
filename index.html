@@ -10,7 +10,13 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 /* ═══════════════════════════════════════════════════════════════════
-   TAINA · АРТ СТУДІЯ — версія 7 («малюємо в каналах»)
+   TAINA · АРТ СТУДІЯ — версія 8
+   Нове у v8: декоративна рамка навколо коду (поле ширше коду, тиха зона
+   2 клітинки недоторкана); олівець ✎ і тон окремо для кожного каналу,
+   очі вмикаються тільки своєю кнопкою; штампи ховаються під кнопку;
+   місце, куди ляже штамп чи кисть, видно сірим навіть на тому ж тоні.
+   ───
+   Версія 7 («малюємо в каналах»)
    • Кожен канал R, G, B — чорно-біла картинка. Малюємо тільки чорним ■
      або білим □ в активному каналі (як у фотошопі). Разом канали дають колір.
    • Є слово: один канал несе код — він заблокований. Палітра (12 варіантів)
@@ -51,18 +57,27 @@ main{min-width:0;min-height:0;display:flex;flex-direction:column;gap:8px;padding
 @keyframes fl{0%,40%{color:#ffb000}100%{color:var(--muted)}}
 
 /* ── панель каналів, як у фотошопі ── */
-.chp{flex:0 0 172px;display:flex;flex-direction:column;gap:4px;align-self:center}
+.chp{flex:0 0 214px;display:flex;flex-direction:column;gap:4px;align-self:center}
 .chp .lbl{margin-bottom:4px}
-.crow{display:flex;align-items:center;gap:6px;padding:5px;border-radius:9px;border:1px solid var(--line);
+.crow{display:flex;align-items:center;gap:5px;padding:5px;border-radius:9px;border:1px solid var(--line);
   background:var(--panel);cursor:pointer;user-select:none}
 .crow:hover{border-color:var(--acc)}
 .crow.act{background:#3a3020;border-color:#ffb000}
-.crow canvas{width:46px;height:46px;image-rendering:pixelated;border-radius:3px;display:block;flex:0 0 auto;background:#000}
+.crow canvas{width:40px;height:40px;image-rendering:pixelated;border-radius:3px;display:block;flex:0 0 auto;background:#000}
 .crow .nm{flex:1;font:700 13px 'JetBrains Mono',monospace;color:var(--txt);display:flex;flex-direction:column;gap:2px}
 .crow .nm small{font:500 10.5px Inter,Arial,sans-serif;color:var(--muted)}
 .crow .eye,.crow .inv{border:1px solid var(--line);background:var(--panel2);color:var(--txt);border-radius:7px;
   height:26px;min-width:26px;padding:0 5px;cursor:pointer;font:700 11px 'JetBrains Mono',monospace;flex:0 0 auto}
-.crow .eye.off{opacity:.35}
+.crow .eye.off,.crow .pen.off{opacity:.3}
+.crow .pen{border:1px solid var(--line);background:var(--panel2);color:var(--txt);border-radius:7px;height:26px;min-width:26px;cursor:pointer;font-size:13px;flex:0 0 auto}
+.crow .pen.on{background:#ffb000;border-color:#ffb000;color:#1a140c}
+.crow .tn{width:22px;height:22px;border-radius:5px;border:2px solid #888;cursor:pointer;flex:0 0 auto;padding:0}
+.crow .tn[hidden]{display:none}
+.stbtn{width:100%;border:1px solid var(--line);background:var(--panel);color:var(--txt);border-radius:11px;
+  font:700 13.5px 'JetBrains Mono',monospace;padding:11px;cursor:pointer;text-align:left}
+.stbtn:hover{border-color:var(--acc);color:var(--hot)}
+#stbody{display:flex;flex-direction:column;gap:8px}
+#stbody[hidden]{display:none}
 .crow .inv.on{background:var(--acc);border-color:var(--acc);color:var(--on-acc)}
 .crow .eye:hover,.crow .inv:hover{border-color:var(--hot)}
 .chp .note{margin-top:4px}
@@ -185,8 +200,7 @@ main{min-width:0;min-height:0;display:flex;flex-direction:column;gap:8px;padding
     </div>
 
     <div class="sec">
-      <span class="lbl">Штампи</span>
-      <div class="seg" id="ss"></div>
+      <button type="button" class="stbtn" id="stbtn">✦ Штампи ▸</button>
       <div class="selbox" id="selbox" hidden>
         <span>Штамп вибрано: тягни мишею або стрілками. ■ □ і ×1…×5 змінюють саме його.</span>
         <div class="row">
@@ -194,8 +208,11 @@ main{min-width:0;min-height:0;display:flex;flex-direction:column;gap:8px;padding
           <button type="button" class="b" id="sel-off">Зняти вибір</button>
         </div>
       </div>
-      <span class="note">Обери штамп і клікни на холсті — він ляже 8 разів вибраним тоном. Щоб посунути — клікни по ньому і тягни.</span>
-      <div id="stamps"></div>
+      <div id="stbody" hidden>
+        <div class="seg" id="ss"></div>
+        <span class="note">Обери штамп і клікни на холсті — він ляже 8 разів у канали з олівцем ✎. Щоб посунути — клікни по ньому і тягни.</span>
+        <div id="stamps"></div>
+      </div>
     </div>
 
     <div class="sec">
@@ -212,6 +229,9 @@ main{min-width:0;min-height:0;display:flex;flex-direction:column;gap:8px;padding
       <label class="sl" id="n-row"><span class="h"><span>Розмір поля</span><b id="n-v"></b></span>
         <input type="range" id="n" min="7" max="79" step="2"></label>
       <span class="note" id="n-note"></span>
+      <label class="sl" id="fw-row"><span class="h"><span>Декоративна рамка</span><b id="fw-v"></b></span>
+        <input type="range" id="fw" min="0" max="30" step="1"></label>
+      <span class="note" id="fw-note"></span>
       <label class="chk"><input type="checkbox" id="grid">Сітка</label>
       <label class="chk"><input type="checkbox" id="axes">Осі симетрії</label>
     </div>
@@ -402,7 +422,9 @@ var MOTIFS=[
    v — тон кисті й нових штампів: 0 чорний, 1 білий. */
 var S={n:25,word:'',car:1,baseW:[0,0,0],neg:false,invW:[0,0,0],baseF:[1,1,1],invF:[0,0,0],
   act:[true,true,true],vis:[true,true,true],tool:'brush',stamp:'rh',ss:1,v:0,size:1,k:4,
-  grid:true,axes:true,ex:20,mg:2};
+  grid:true,axes:true,ex:20,mg:2,tones:[0,0,0],fw:0,stOpen:false};
+/* act — олівець ✎ на каналі (малюємо в ньому), tones — тон олівця в кожному каналі.
+   fw — ширина декоративної рамки (клітинок) навколо коду. */
 /* МАЛЮНОК — список дій по черзі; що пізніше, те зверху.
    {t:'s', chs, v, keys}   — мазок кисті або заготовка (keys — клітинки октанта)
    {t:'st', id, k, x, y, ss, chs, v} — штамп-об'єкт (x,y — зсув від центру)
@@ -426,7 +448,8 @@ function clampN(v){v=Math.round(+v)||25;if(v%2===0)v++;return Math.max(MIN_N,Mat
 })();
 function save(){try{localStorage.setItem('taina_studio4',JSON.stringify({
   n:S.n,word:S.word,car:S.car,baseW:S.baseW,neg:S.neg,invW:S.invW,baseF:S.baseF,invF:S.invF,act:S.act,vis:S.vis,
-  tool:S.tool,stamp:S.stamp,ss:S.ss,v:S.v,size:S.size,k:S.k,grid:S.grid,axes:S.axes,ex:S.ex,mg:S.mg,M:M}));}catch(e){}}
+  tool:S.tool,stamp:S.stamp,ss:S.ss,v:S.v,size:S.size,k:S.k,grid:S.grid,axes:S.axes,ex:S.ex,mg:S.mg,
+  tones:S.tones,fw:S.fw,stOpen:S.stOpen,M:M}));}catch(e){}}
 
 /* ═══ СЛОВО → КОД ═══ 1 клітинка = 1 біт UTF-8, октант ×8.
    Поле і рамка-зебра — лише за довжиною слова. */
@@ -448,12 +471,17 @@ function wordInfo(){
   return WC;
 }
 function isW(){return !!wordInfo();}
-function N(){var w=wordInfo();return w?w.n:S.n;}
+/* N — увесь холст (код + тиха зона + рамка), dN — лише поле коду */
+function N(){var w=wordInfo();return w?w.n+10+2*S.fw:S.n;}
+function dN(){var w=wordInfo();return w?w.n:S.n;}
 function ops(){return isW()?M.W:M.F;}
 function base(){return isW()?S.baseW:S.baseF;}
 function free(f){return !isW()||f!==S.car;}
+/* зона клітинки на холсті з кодом: d — поле коду, k — кільця коду і тиха зона (заблоковано), f — декоративна рамка */
+function zoneOf(x,y,G){var c=(G-1)/2,R=(dN()-1)/2,d=Math.max(Math.abs(x-c),Math.abs(y-c));return d<=R?'d':d<=R+5?'k':'f';}
 function freeList(){return [0,1,2].filter(free);}
-function actList(){return [0,1,2].filter(function(f){return S.act[f]&&free(f);});}
+function actList(){return [0,1,2].filter(function(f){return S.act[f];});}
+function tonesNow(){return S.tones.slice();}
 function invField(f){return isW()?(S.invW[f]===1||S.invW[f]===2):!!S.invF[f];}
 function invFrame(f){return isW()&&(S.invW[f]===2||S.invW[f]===3);}
 
@@ -490,66 +518,64 @@ function brushCells(x,y,n){
   return out;
 }
 
-/* ═══ КАРТА ═══ ch[f] — тон кожної клітинки поля в каналі f (0/1) до інверсії.
-   Потім: печатка, інверсія, рамка, тиха зона → кольори 0/255. */
-function layersData(n,list){
-  var b=base(), ch=[], map=keyCells(n), car=isW()?S.car:-1;
-  for(var f=0;f<3;f++){ch[f]=new Uint8Array(n*n);if(f!==car)ch[f].fill(b[f]);}
-  list.forEach(function(o){
-    var ks=opKeys(o,n), cs=o.chs.filter(function(f){return f!==car;});
-    if(!cs.length)return;
-    ks.forEach(function(k){var idx=map[k];if(!idx)return;
-      cs.forEach(function(f){var arr=ch[f],v=o.v==='b'?b[f]:o.v;for(var i=0;i<idx.length;i++)arr[idx[i]]=v;});});
-  });
-  return ch;
-}
-/* ПЕЧАТКА: центр 5×5 у кожному вільному каналі — одного тону.
-   Тон — той, якого більше на кільці навколо (щоб центр не випадав).
-   Рівний центр робить перший байт непридатним — сканер не прочитає
-   малюнок як текст. */
-function applySeal(ch,n){
-  var c=(n-1)/2, out=[];
+/* ═══ КАРТА ═══ на кожен канал — тон кожної клітинки (0/1).
+   Поле коду: вільні канали — стартовий тон + малюнок, потім печатка й інверсія.
+   Кільця коду й тиха зона: не малюються. Рамка: старт — колір тихої зони,
+   малювати можна в усіх трьох каналах. */
+function opVal(o,f,bv){return o.v==='b'?bv:(Array.isArray(o.v)?o.v[f]:o.v);}
+function applySeal(ch,G){
+  var c=(G-1)/2;
   freeList().forEach(function(f){
     var one=0,tot=0,x,y;
-    for(y=c-3;y<=c+3;y++)for(x=c-3;x<=c+3;x++){if(Math.max(Math.abs(x-c),Math.abs(y-c))!==3)continue;tot++;one+=ch[f][y*n+x];}
+    for(y=c-3;y<=c+3;y++)for(x=c-3;x<=c+3;x++){if(Math.max(Math.abs(x-c),Math.abs(y-c))!==3)continue;tot++;one+=ch[f][y*G+x];}
     var v=one*2>tot?1:one*2<tot?0:base()[f];
-    for(y=c-2;y<=c+2;y++)for(x=c-2;x<=c+2;x++)ch[f][y*n+x]=v;
-    out[f]=v;
+    for(y=c-2;y<=c+2;y++)for(x=c-2;x<=c+2;x++)ch[f][y*G+x]=v;
   });
-  return out;
 }
+function qzTone(f){return f===S.car?(S.neg?0:1):(invFrame(f)?1-S.baseW[f]:S.baseW[f]);}
 function matrix(extra){
-  var W=wordInfo(), n=N(), list=ops().concat(extra||[]), ch=layersData(n,list), b=base(), x, y, f, i;
-  var drawn=0;
-  for(i=0;i<n*n;i++){for(f=0;f<3;f++)if(free(f)&&ch[f][i]!==b[f]){drawn++;break;}}
+  var W=wordInfo(),G=N(),list=ops().concat(extra||[]),map=keyCells(G),b=base(),x,y,f,i,drawn=0;
   if(!W){
-    var cells=new Array(n*n);
-    for(i=0;i<n*n;i++){var col=[0,0,0];for(f=0;f<3;f++){var v=ch[f][i];if(invField(f))v=1-v;col[f]=v*255;}cells[i]=col;}
-    return {T:n,off:0,n:n,cells:cells,word:false,cnt:drawn};
+    var ch=[0,1,2].map(function(f){var a=new Uint8Array(G*G);a.fill(b[f]);return a;});
+    list.forEach(function(o){var cs=o.chs;opKeys(o,G).forEach(function(k){var idx=map[k];if(!idx)return;
+      cs.forEach(function(f){var v=opVal(o,f,b[f]);for(var q=0;q<idx.length;q++)ch[f][idx[q]]=v;});});});
+    var cells=new Array(G*G);
+    for(i=0;i<G*G;i++){var col=[0,0,0],dd=false;for(f=0;f<3;f++){var v=ch[f][i];if(v!==b[f])dd=true;if(invField(f))v=1-v;col[f]=v*255;}if(dd)drawn++;cells[i]=col;}
+    return {T:G,off:0,n:G,cells:cells,word:false,cnt:drawn};
   }
-  applySeal(ch,n);
-  var CW=n+6,T=CW+4,cl=new Array(T*T),car=S.car;
-  for(y=0;y<T;y++)for(x=0;x<T;x++){
-    var X=x-2,Y=y-2,r=(X<0||Y<0||X>=CW||Y>=CW)?-1:Math.min(X,Y,CW-1-X,CW-1-Y),col2=[0,0,0],cv2;
-    /* канал коду */
+  var n=W.n,car=S.car,zone=new Array(G*G),qz=[qzTone(0),qzTone(1),qzTone(2)];
+  for(y=0;y<G;y++)for(x=0;x<G;x++)zone[y*G+x]=zoneOf(x,y,G);
+  var chd=[0,1,2].map(function(f){var a=new Uint8Array(G*G);a.fill(f===car?0:b[f]);return a;});
+  var chf=[0,1,2].map(function(f){var a=new Uint8Array(G*G);a.fill(qz[f]);return a;});
+  list.forEach(function(o){var cs=o.chs;opKeys(o,G).forEach(function(k){var idx=map[k];if(!idx)return;
+    for(var q=0;q<idx.length;q++){var id=idx[q],z=zone[id];
+      if(z==='d')cs.forEach(function(f){if(f!==car)chd[f][id]=opVal(o,f,b[f]);});
+      else if(z==='f')cs.forEach(function(f){chf[f][id]=opVal(o,f,qz[f]);});}});});
+  applySeal(chd,G);
+  var F=S.fw,CW=n+6,cl=new Array(G*G);
+  for(y=0;y<G;y++)for(x=0;x<G;x++){
+    var id=y*G+x,z=zone[id],col2=[0,0,0];
+    if(z==='f'){var dd2=false;for(f=0;f<3;f++){col2[f]=chf[f][id]*255;if(chf[f][id]!==qz[f])dd2=true;}if(dd2)drawn++;cl[id]=col2;continue;}
+    var X=x-F-2,Y=y-F-2,r=(X<0||Y<0||X>=CW||Y>=CW)?-1:Math.min(X,Y,CW-1-X,CW-1-Y),cv2;
     if(r<0)cv2=1;else if(r===0)cv2=0;else if(r===1)cv2=1;else if(r===2)cv2=((X+Y)%2===0)?0:1;
     else cv2=W.g[(Y-3)*n+(X-3)];
     if(S.neg)cv2=1-cv2;
     col2[car]=cv2*255;
-    /* вільні канали */
+    var dd3=false;
     for(f=0;f<3;f++){if(f===car)continue;var vv;
-      if(r>=3){vv=ch[f][(Y-3)*n+(X-3)];if(invField(f))vv=1-vv;}
-      else{vv=b[f];if(invFrame(f))vv=1-vv;}
+      if(r>=3){vv=chd[f][id];if(vv!==b[f])dd3=true;if(invField(f))vv=1-vv;}
+      else vv=qz[f];
       col2[f]=vv*255;}
-    cl[y*T+x]=col2;
+    if(dd3)drawn++;
+    cl[id]=col2;
   }
-  return {T:T,off:5,n:n,cells:cl,word:true,cnt:drawn};
+  return {T:G,off:F+5,n:n,cells:cl,word:true,cnt:drawn};
 }
 
 /* ═══ ПЕРЕВІРКА ═══ читаємо канал коду з готових кольорів і розшифровуємо */
 function verify(Mx){
   var W=wordInfo(), n=W.n, T=Mx.T, car=S.car, bad=0, x, y;
-  var bitAt=function(x,y){var v=Mx.cells[(y+5)*T+(x+5)][car]>127?1:0;return S.neg?1-v:v;};
+  var o5=Mx.off,bitAt=function(x,y){var v=Mx.cells[(y+o5)*T+(x+o5)][car]>127?1:0;return S.neg?1-v:v;};
   for(y=0;y<n;y++)for(x=0;x<n;x++)if(bitAt(x,y)!==W.g[y*n+x])bad++;
   var c=(n-1)/2,bits=[];
   for(var a=0;a<=c;a++)for(var bb=0;bb<=a;bb++)bits.push(bitAt(c+a,c+bb));
@@ -585,20 +611,27 @@ function ghostOp(){
   if(!hover||drawing||drag||!S.tool)return null;
   var chs=actList();if(!chs.length)return null;
   var n=N();
-  if(S.tool==='brush')return {t:'s',chs:chs,v:S.v,keys:brushCells(hover[0],hover[1],n).map(function(p){return keyN(p[0],p[1],n);})};
-  var c=(n-1)/2;return {t:'st',k:S.stamp,x:hover[0]-c,y:hover[1]-c,ss:S.ss,chs:chs,v:S.v};
+  if(S.tool==='brush')return {t:'s',chs:chs,v:tonesNow(),keys:brushCells(hover[0],hover[1],n).map(function(p){return keyN(p[0],p[1],n);})};
+  var c=(n-1)/2;return {t:'st',k:S.stamp,x:hover[0]-c,y:hover[1]-c,ss:S.ss,chs:chs,v:tonesNow()};
 }
 function selObj(){if(sel==null)return null;var L=ops();for(var i=0;i<L.length;i++)if(L[i].id===sel)return L[i];return null;}
 function draw(Mx){
   Mx=Mx||matrix();
   if(Mx.T!==curT){fit();return;}
-  var T=Mx.T,n=Mx.n,off=Mx.off,x,y,i,go=ghostOp(),Gx=go?matrix([go]):null;
+  var T=Mx.T,n=Mx.n,off=Mx.off,x,y,i,go=ghostOp(),Gx=go?matrix([go]):null,cov=null;
+  /* де ляже штамп чи кисть: якщо тон той самий — показуємо сірим, щоб було видно */
+  if(go){cov=new Uint8Array(T*T);var mp=keyCells(T);opKeys(go,T).forEach(function(k){(mp[k]||[]).forEach(function(id){
+    var z=Mx.word?zoneOf(id%T,Math.floor(id/T),T):'d';if(z==='k')return;cov[id]=1;});});}
   g.setTransform(dpr,0,0,dpr,0,0);
   for(y=0;y<T;y++)for(x=0;x<T;x++){
-    var a=Mx.cells[y*T+x],b2=Gx?Gx.cells[y*T+x]:null;
-    g.fillStyle=css(disp((b2&&!same(a,b2))?mix(a,b2):a));g.fillRect(x*cs,y*cs,cs,cs);
+    var a=Mx.cells[y*T+x],b2=Gx?Gx.cells[y*T+x]:null,col;
+    if(b2&&!same(a,b2))col=mix(disp(a),disp(b2));
+    else if(cov&&cov[y*T+x])col=mix(disp(a),[128,128,128]);
+    else col=disp(a);
+    g.fillStyle=css(col);g.fillRect(x*cs,y*cs,cs,cs);
   }
   var x0=off*cs,x1=(off+n)*cs;
+  if(Mx.word&&S.fw>0){x0=0;x1=T*cs;n=T;}
   if(S.grid&&cs>=5){
     g.strokeStyle='rgba(128,128,128,.32)';g.lineWidth=1/dpr;g.beginPath();
     for(i=1;i<n;i++){var v=x0+i*cs;g.moveTo(v,x0);g.lineTo(v,x1);g.moveTo(x0,v);g.lineTo(x1,v);}
@@ -612,36 +645,42 @@ function draw(Mx){
   }
   /* курсор кисті — просто квадратик */
   if(hover&&S.tool==='brush'&&!drag){
-    var bc=brushCells(hover[0],hover[1],n),mnx=1e9,mny=1e9,mxx=-1,mxy=-1;
+    var bc=brushCells(hover[0],hover[1],T),mnx=1e9,mny=1e9,mxx=-1,mxy=-1;
     bc.forEach(function(p){mnx=Math.min(mnx,p[0]);mny=Math.min(mny,p[1]);mxx=Math.max(mxx,p[0]);mxy=Math.max(mxy,p[1]);});
     if(bc.length){g.strokeStyle='rgba(128,128,128,.9)';g.lineWidth=1;
-      g.strokeRect((mnx+off)*cs+.5,(mny+off)*cs+.5,(mxx-mnx+1)*cs-1,(mxy-mny+1)*cs-1);}
+      g.strokeRect(mnx*cs+.5,mny*cs+.5,(mxx-mnx+1)*cs-1,(mxy-mny+1)*cs-1);}
   }
   /* вибраний штамп — тонка бліда рамка лише навколо копії, за яку взялися */
   var so=selObj();
   if(so){
-    var cc=(n-1)/2,bs=stampCellsOf(STAMP_BY[so.k],so.ss,cc+so.x,cc+so.y,n);
+    var cc=(T-1)/2,bs=stampCellsOf(STAMP_BY[so.k],so.ss,cc+so.x,cc+so.y,T);
     if(bs.length){var a1=1e9,b1=1e9,a2=-1e9,b3=-1e9;
       bs.forEach(function(p){var q=tf(selT,p[0]-cc,p[1]-cc);a1=Math.min(a1,q[0]);b1=Math.min(b1,q[1]);a2=Math.max(a2,q[0]);b3=Math.max(b3,q[1]);});
       g.strokeStyle='rgba(255,170,0,.6)';g.lineWidth=1;
-      g.strokeRect((a1+cc+off)*cs-.5,(b1+cc+off)*cs-.5,(a2-a1+1)*cs+1,(b3-b1+1)*cs+1);}
+      g.strokeRect((a1+cc)*cs-.5,(b1+cc)*cs-.5,(a2-a1+1)*cs+1,(b3-b1+1)*cs+1);}
   }
   drawChans(Mx);verdict(Mx);
-  $('st-n').textContent=n+'×'+n;$('st-c').textContent=Mx.cnt;
+  $('st-n').textContent=Mx.word?(Mx.n+'×'+Mx.n+(S.fw?' + рамка':'')):(Mx.T+'×'+Mx.T);$('st-c').textContent=Mx.cnt;
   cv.style.cursor=S.tool==='brush'?'none':S.tool==='stamp'?'copy':(hover&&hitObj(hover[0],hover[1]))?'grab':'default';
 }
 
-/* ═══ ПАНЕЛЬ КАНАЛІВ ═══ клік — малюємо і дивимось лише цей канал;
-   Shift+клік — додати канал; RGB — усі разом; око — показати/сховати */
+/* ═══ ПАНЕЛЬ КАНАЛІВ ═══ як у фотошопі, але кнопки незалежні:
+   👁 — показати/сховати канал; ✎ — малювати в каналі; квадратик — тон олівця
+   цього каналу (чорний/білий). Клік по рядку — те саме, що ✎. */
 function buildChans(){
   var box=$('crows');box.innerHTML='';
   [-1,0,1,2].forEach(function(ch){
     var d=document.createElement('div');d.className='crow';d.dataset.ch=ch;
-    d.innerHTML='<button type="button" class="eye" title="Показати або сховати">👁</button><canvas></canvas>'+
-      '<span class="nm"><span></span><small></small></span><button type="button" class="inv" title="Інвертувати"></button>';
-    d.onclick=function(e){if(e.target.closest('button'))return;pickChan(ch,e.shiftKey);};
+    d.innerHTML='<button type="button" class="eye" title="Показати або сховати канал">👁</button><canvas></canvas>'+
+      '<span class="nm"><span></span><small></small></span>'+
+      '<button type="button" class="pen" title="Малювати в цьому каналі">✎</button>'+
+      '<button type="button" class="tn" title="Тон олівця в цьому каналі: чорний / білий"></button>'+
+      '<button type="button" class="inv" title="Інвертувати"></button>';
+    d.onclick=function(e){if(e.target.closest('button'))return;togglePen(ch);};
+    d.querySelector('.pen').onclick=function(){togglePen(ch);};
+    d.querySelector('.tn').onclick=function(){if(ch<0)return;S.tones[ch]=1-S.tones[ch];save();draw();};
     d.querySelector('.eye').onclick=function(){
-      if(ch<0){S.vis=[true,true,true];}
+      if(ch<0){var all=S.vis[0]&&S.vis[1]&&S.vis[2];if(all)return;S.vis=[true,true,true];}
       else{var v=S.vis.slice();v[ch]=!v[ch];if(!v[0]&&!v[1]&&!v[2])return;S.vis=v;}
       save();draw();};
     d.querySelector('.inv').onclick=function(){
@@ -653,37 +692,41 @@ function buildChans(){
     box.appendChild(d);
   });
 }
-function pickChan(ch,shift){
-  if(ch<0){S.act=[true,true,true];S.vis=[true,true,true];}
-  else if(isW()&&ch===S.car){S.vis=[ch===0,ch===1,ch===2];S.act=[false,false,false];}
-  else if(shift){var a=S.act.slice();a[ch]=!a[ch];S.act=a;var fl=freeList().filter(function(f){return a[f];});
-    S.vis=fl.length?[0,1,2].map(function(f){return fl.indexOf(f)>=0;}):[true,true,true];}
-  else{S.act=[ch===0,ch===1,ch===2];S.vis=S.act.slice();}
+/* олівець: увімкнули — бере тон із панелі «Кисть і тон»; вимкнули — зникає.
+   RGB-рядок: увімкнути олівці в усіх каналах (або вимкнути всі). */
+function togglePen(ch){
+  if(ch<0){var on=!(S.act[0]&&S.act[1]&&S.act[2]);S.act=[on,on,on];if(on)S.tones=[S.v,S.v,S.v];}
+  else{var a=S.act.slice();a[ch]=!a[ch];if(a[ch])S.tones[ch]=S.v;S.act=a;}
   save();syncPanel();draw();
 }
 function drawChans(Mx){
-  var rows=$('crows').children,T=Mx.T,k=Math.max(1,Math.floor(46/T))||1,alls=S.vis[0]&&S.vis[1]&&S.vis[2],al=actList();
+  var rows=$('crows').children,T=Mx.T,k=Math.max(1,Math.floor(40/T))||1,alls=S.vis[0]&&S.vis[1]&&S.vis[2],al=actList();
   Array.prototype.forEach.call(rows,function(d){
     var ch=+d.dataset.ch,cvs=d.querySelector('canvas'),locked=isW()&&ch===S.car;
-    var nm=d.querySelector('.nm span'),sm=d.querySelector('.nm small'),iv=d.querySelector('.inv'),ey=d.querySelector('.eye');
-    if(ch<0){nm.textContent='RGB';sm.textContent='усі разом';iv.style.visibility='hidden';
-      d.classList.toggle('act',alls&&al.length===freeList().length);ey.classList.toggle('off',!alls);}
+    var nm=d.querySelector('.nm span'),sm=d.querySelector('.nm small'),iv=d.querySelector('.inv'),ey=d.querySelector('.eye'),
+        pn=d.querySelector('.pen'),tn=d.querySelector('.tn');
+    if(ch<0){nm.textContent='RGB';sm.textContent='усі разом';iv.style.visibility='hidden';tn.hidden=true;
+      var allp=S.act[0]&&S.act[1]&&S.act[2];pn.classList.toggle('on',allp);pn.classList.toggle('off',!allp);
+      d.classList.toggle('act',allp);ey.classList.toggle('off',!alls);}
     else{
       nm.textContent=CHN[ch]+(locked?' 🔒':'');
-      sm.textContent=locked?'код — заблоковано':(S.act[ch]?'малюєш тут':'');
+      sm.textContent=locked?(S.act[ch]&&S.fw?'код; ✎ лише в рамці':'код — заблоковано'):'';
       iv.style.visibility='visible';
       if(locked){iv.textContent=S.neg?'◐ нег.':'◐';iv.classList.toggle('on',S.neg);iv.title='Негатив коду разом із рамкою';}
       else if(isW()){iv.textContent=INV_LBL[S.invW[ch]];iv.classList.toggle('on',S.invW[ch]>0);iv.title='Інверсія: поле → поле і рамка → рамка → нічого';}
       else{iv.textContent=S.invF[ch]?'◐ так':'◐';iv.classList.toggle('on',!!S.invF[ch]);iv.title='Інверсія каналу';}
-      d.classList.toggle('act',!locked&&S.act[ch]&&!alls);
+      pn.classList.toggle('on',!!S.act[ch]);pn.classList.toggle('off',!S.act[ch]);
+      tn.hidden=!S.act[ch];tn.style.background=S.tones[ch]?'#fff':'#000';
+      d.classList.toggle('act',!!S.act[ch]);
       ey.classList.toggle('off',!S.vis[ch]);
     }
     cvs.width=cvs.height=T*k;var x2=cvs.getContext('2d');
     for(var y=0;y<T;y++)for(var x=0;x<T;x++){var c=Mx.cells[y*T+x];x2.fillStyle=ch<0?css(c):'rgb('+c[ch]+','+c[ch]+','+c[ch]+')';x2.fillRect(x*k,y*k,k,k);}
   });
-  var al2=actList();
-  $('ch-note').textContent=!al2.length?'Обери канал для малювання (клік по R, G чи B).':'Shift+клік — малювати в кількох каналах.';
-  $('ch-note').classList.toggle('warn',!al2.length);
+  var onlyCar=isW()&&al.length===1&&al[0]===S.car&&!S.fw;
+  $('ch-note').textContent=!al.length?'Увімкни олівець ✎ хоча б в одному каналі.':
+    onlyCar?'Канал коду заблокований — малювати в ньому можна лише в декоративній рамці.':'👁 — показати канал, ✎ — малювати в ньому, квадратик — тон олівця.';
+  $('ch-note').classList.toggle('warn',!al.length||onlyCar);
 }
 
 function verdict(Mx){
@@ -701,8 +744,8 @@ function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp
 
 /* ═══ ДІЇ МИШЕЮ ═══ */
 function cellAt(e){
-  var r=cv.getBoundingClientRect(),off=isW()?5:0,n=N();
-  var X=Math.floor((e.clientX-r.left)/r.width*curT)-off,Y=Math.floor((e.clientY-r.top)/r.height*curT)-off;
+  var r=cv.getBoundingClientRect(),n=N();
+  var X=Math.floor((e.clientX-r.left)/r.width*curT),Y=Math.floor((e.clientY-r.top)/r.height*curT);
   return (X<0||Y<0||X>=n||Y>=n)?null:[X,Y];
 }
 function hitObj(x,y){
@@ -716,7 +759,7 @@ function hitObj(x,y){
 }
 function moveSel(dx,dy,from){
   var o=selObj();if(!o)return false;
-  var d=tfInv(selT,dx,dy),R=MAX_R,bx=from?from.x:o.x,by=from?from.y:o.y;
+  var d=tfInv(selT,dx,dy),R=(N()-1)/2,bx=from?from.x:o.x,by=from?from.y:o.y;
   var nx=Math.max(-R,Math.min(R,bx+d[0])),ny=Math.max(-R,Math.min(R,by+d[1]));
   if(nx===o.x&&ny===o.y)return false;o.x=nx;o.y=ny;return true;
 }
@@ -743,12 +786,12 @@ cv.addEventListener('pointerdown',function(e){
   }
   var chs=actList();if(!chs.length){flashHint();return;}
   if(S.tool==='stamp'){
-    var n=N(),cc=(n-1)/2,o={t:'st',id:objSeq++,k:S.stamp,x:c[0]-cc,y:c[1]-cc,ss:S.ss,chs:chs,v:S.v};
+    var n=N(),cc=(n-1)/2,o={t:'st',id:objSeq++,k:S.stamp,x:c[0]-cc,y:c[1]-cc,ss:S.ss,chs:chs,v:tonesNow()};
     ops().push(o);
     /* штамп ліг і відпустився; одразу вибраний — можна посунути стрілками */
     S.tool=null;sel=o.id;selT=0;hover=null;pushHist();after();return;
   }
-  var op={t:'s',chs:chs,v:S.v,keys:[]};ops().push(op);
+  var op={t:'s',chs:chs,v:tonesNow(),keys:[]};ops().push(op);
   drawing={op:op,ks:new Set()};last=c;addLine(c,c);
   try{cv.setPointerCapture(e.pointerId);}catch(_){}
   draw();
@@ -776,10 +819,11 @@ cv.addEventListener('contextmenu',function(e){e.preventDefault();});
 var tplLive=null;
 function tplOp(m){
   var chs=actList();if(!chs.length)return null;
-  if(!m.f){var all=[];for(var a=0;a<=MAX_R;a++)for(var b=0;b<=a;b++)all.push(a+','+b);return {t:'s',chs:chs,v:'b',keys:all,tpl:m.k};}
+  var RR=(N()-1)/2;
+  if(!m.f){var all=[];for(var a=0;a<=RR;a++)for(var b=0;b<=a;b++)all.push(a+','+b);return {t:'s',chs:chs,v:'b',keys:all,tpl:m.k};}
   var keys=[];
-  for(var a2=0;a2<=MAX_R;a2++)for(var b2=0;b2<=a2;b2++){var r=m.f(a2,b2);if((((r%S.k)+S.k)%S.k)<Math.floor(S.k/2))keys.push(a2+','+b2);}
-  return {t:'s',chs:chs,v:S.v,keys:keys,tpl:m.k};
+  for(var a2=0;a2<=RR;a2++)for(var b2=0;b2<=a2;b2++){var r=m.f(a2,b2);if((((r%S.k)+S.k)%S.k)<Math.floor(S.k/2))keys.push(a2+','+b2);}
+  return {t:'s',chs:chs,v:tonesNow(),keys:keys,tpl:m.k};
 }
 function iconCanvas(N2,fn){
   var c=document.createElement('canvas');c.width=c.height=N2;var x=c.getContext('2d');
@@ -821,8 +865,7 @@ $('sel-off').onclick=function(){sel=null;syncSel();draw();};
 
 /* малюнок чистого холста — у вільні канали орнаменту (канал коду пропускаємо) */
 $('take').onclick=function(){
-  M.F.forEach(function(o){var c=JSON.parse(JSON.stringify(o));c.chs=c.chs.filter(function(f){return f!==S.car;});
-    if(c.t==='st')c.id=objSeq++;if(c.chs.length)M.W.push(c);});
+  M.F.forEach(function(o){var c=JSON.parse(JSON.stringify(o));if(c.t==='st')c.id=objSeq++;if(c.chs.length)M.W.push(c);});
   pushHist();after();
 };
 
@@ -882,11 +925,14 @@ function setPalW(car,bs){
     /* поворот каналів: вільні канали за порядком переходять у нові вільні */
     var of=[0,1,2].filter(function(f){return f!==oc;}),nf=[0,1,2].filter(function(f){return f!==car;});
     var mp=function(f){var i=of.indexOf(f);return i<0?f:nf[i];};
-    M.W.forEach(function(o){o.chs=o.chs.map(mp).filter(function(f){return f!==car;});});
-    var inv=[0,0,0],act=[false,false,false],vis=[true,true,true];
-    of.forEach(function(f,i){inv[nf[i]]=S.invW[f];act[nf[i]]=S.act[f];});
-    S.invW=inv;S.act=act;S.vis=vis;S.car=car;
-    if(!actList().length)S.act=[true,true,true];
+    var mp2=function(f){return f===oc?car:mp(f);};
+    M.W.forEach(function(o){var oldv=Array.isArray(o.v)?o.v.slice():null;o.chs=o.chs.map(mp2);
+      if(oldv){var nv=[0,0,0];[0,1,2].forEach(function(f){nv[mp2(f)]=oldv[f];});o.v=nv;}});
+    /* канал коду лишається каналом коду: його олівець (для рамки) переходить разом із ним */
+    var inv=[0,0,0],act=[false,false,false],tn=[0,0,0];
+    of.forEach(function(f,i){inv[nf[i]]=S.invW[f];act[nf[i]]=S.act[f];tn[nf[i]]=S.tones[f];});
+    act[car]=S.act[oc];tn[car]=S.tones[oc];
+    S.invW=inv;S.act=act;S.tones=tn;S.vis=[true,true,true];S.car=car;
     pushHist();
   }
   S.baseW=bs;after();buildPal();
@@ -904,6 +950,9 @@ function syncPanel(){
   Array.prototype.forEach.call($('stamps').querySelectorAll('button'),function(b){b.classList.toggle('on',S.tool==='stamp'&&b.dataset.k===S.stamp);});
   $('selbox').hidden=!so;
   $('n-row').hidden=!!W;$('n').value=S.n;$('n-v').textContent=S.n+'×'+S.n;
+  $('fw-row').hidden=!W;$('fw').value=S.fw;$('fw-v').textContent=S.fw?S.fw+' кл.':'немає';
+  $('fw-note').textContent=W?(S.fw?'Рамку малюй будь-де навколо коду — у всіх трьох каналах. Тиха зона (2 клітинки біля коду) і кільця коду заблоковані.':'Збільш — навколо коду з’явиться місце для декоративної рамки.'):'';
+  $('stbody').hidden=!S.stOpen;$('stbtn').textContent=(S.stOpen?'✦ Штампи ▾':'✦ Штампи ▸')+(S.tool==='stamp'?' · '+(STAMP_BY[S.stamp].uk||'символ'):'');
   $('n-note').textContent=W?('Поле '+W.n+'×'+W.n+' — за довжиною слова, рамка-зебра підлаштовується сама.'):'';
   $('k').value=S.k;$('k-v').textContent=S.k;
   $('ex').value=S.ex;$('ex-v').textContent=S.ex+' пікс.';
@@ -912,13 +961,14 @@ function syncPanel(){
   var d=exportDims();$('ex-size').textContent='Картинка: '+d.px+'×'+d.px+' пікселів';
   $('word-note').textContent=W?(W.bytes+' / '+BYTE_MAX+' байт'):'';
   $('take').hidden=!W||!M.F.length;
-  $('tool-note').textContent=S.tool==='brush'?'Кисть: малюєш вибраним тоном. Ще раз натисни «Кисть» або Esc — відпустити, щоб брати штампи мишею.':'';
+  $('tool-note').textContent=S.tool==='brush'?'Кисть малює в каналах з олівцем ✎ — кожен своїм тоном (квадратик біля каналу). ■ □ тут ставлять тон усім увімкненим олівцям. Ще раз «Кисть» або Esc — відпустити, щоб брати штампи мишею.':'';
   $('hint').innerHTML=(S.tool==='brush'?'Малюєш кистю. ':S.tool==='stamp'?'Клікни на холсті — поставити штамп. ':'Клікни по штампу — вибрати і тягнути. ')+
-    'Клавіші: <b>B</b> кисть, <b>X</b> чорний/білий, <b>[</b> <b>]</b> товщина, <b>1 2 3</b> канал, <b>0</b> RGB, стрілки — посунути штамп, <b>Delete</b>, <b>Esc</b>, <b>Ctrl+Z</b>.';
+    'Клавіші: <b>B</b> кисть, <b>X</b> чорний/білий, <b>[</b> <b>]</b> товщина, <b>1 2 3</b> олівець у каналі, <b>0</b> усі, стрілки — посунути штамп, <b>Delete</b>, <b>Esc</b>, <b>Ctrl+Z</b>.';
   syncTpl();syncHist();
 }
 function after(){save();syncPanel();fit();}
-function setTone(v){var o=selObj();if(o){o.v=v;pushHist();}else S.v=v;save();syncPanel();draw();}
+/* тон на панелі: стає тоном нових олівців і одразу — усіх увімкнених; для вибраного штампа — тон штампа */
+function setTone(v){var o=selObj();if(o){o.v=v;pushHist();}else{S.v=v;[0,1,2].forEach(function(f){if(S.act[f])S.tones[f]=v;});}save();syncPanel();draw();}
 $('tone0').onclick=function(){setTone(0);};
 $('tone1').onclick=function(){setTone(1);};
 $('brush').onclick=function(){S.tool=S.tool==='brush'?null:'brush';sel=null;save();syncPanel();draw();};
@@ -928,10 +978,12 @@ $('word').addEventListener('input',function(e){
   Array.from(v).some(function(ch){if(enc.encode(out+ch).length>BYTE_MAX)return true;out+=ch;return false;});
   if(out!==v)e.target.value=out;
   var was=isW();S.word=out;WC.key=null;hover=null;sel=null;
-  if(was!==isW()){S.act=[true,true,true];S.vis=[true,true,true];buildPal();}
+  if(was!==isW()){S.vis=[true,true,true];buildPal();}
   after();
 });
 $('size').oninput=function(e){S.size=+e.target.value;save();syncPanel();};
+$('fw').oninput=function(e){S.fw=+e.target.value;save();syncPanel();fit();};
+$('stbtn').onclick=function(){S.stOpen=!S.stOpen;save();syncPanel();};
 $('n').oninput=function(e){S.n=clampN(e.target.value);save();syncPanel();fit();};
 $('k').oninput=function(e){
   S.k=+e.target.value;save();buildTpl();
@@ -961,8 +1013,8 @@ document.addEventListener('keydown',function(e){
   if(e.code==='KeyX'){setTone(so?1-so.v:1-S.v);return;}
   if(e.code==='BracketLeft'){S.size=Math.max(1,S.size-1);save();syncPanel();draw();return;}
   if(e.code==='BracketRight'){S.size=Math.min(7,S.size+1);save();syncPanel();draw();return;}
-  if(e.code==='Digit1'||e.code==='Digit2'||e.code==='Digit3'){pickChan(+e.code.slice(5)-1,e.shiftKey);return;}
-  if(e.code==='Digit0'){pickChan(-1,false);return;}
+  if(e.code==='Digit1'||e.code==='Digit2'||e.code==='Digit3'){togglePen(+e.code.slice(5)-1);return;}
+  if(e.code==='Digit0'){togglePen(-1);return;}
 });
 addEventListener('resize',fit);
 
